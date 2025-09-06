@@ -53,7 +53,6 @@ function getInstructions() {
         doseChange = 'DECREASE by 4 units/kg/hr and restart when aPTT <121';
         nextAptt = '6hrs after aPTT <121';
         highlightClass = 'highlight-red';
-    }
     } else {
         // This handles aPTT values between 41 and 50, which is not on the protocol chart
         resultsDiv.innerHTML = '<p style="color: red;">The provided aPTT value is outside the ranges defined in the protocol chart.</p>';
@@ -90,6 +89,7 @@ apttInput.addEventListener('keypress', function(event) {
         getInstructions();
     }
 });
+
 
 
 
