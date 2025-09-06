@@ -79,3 +79,12 @@ function getInstructions() {
 
     resultsDiv.innerHTML = htmlOutput;
 }
+
+// Add event listener for the 'keypress' event outside the function
+const apttInput = document.getElementById('aptt');
+apttInput.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        getInstructions();
+    }
+});
