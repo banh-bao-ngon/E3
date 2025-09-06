@@ -63,7 +63,7 @@ function getInstructions() {
             <h2>Bolus:</h2>
             <p>${bolus}</p>
         </div>
-        <div class="result-item">
+        <div class="result-item ${highlightClass}">
             <h2>Hold Infusion:</h2>
             <p>${holdInfusion}</p>
         </div>
@@ -88,3 +88,4 @@ apttInput.addEventListener('keypress', function(event) {
         getInstructions();
     }
 });
+
