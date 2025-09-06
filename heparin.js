@@ -48,7 +48,6 @@ function getInstructions() {
         doseChange = 'Decrease by 3 units/kg/hr';
     } else if (apttValue >= 200) {
         bolus = 'None';
-        // This line is correct and will display "Hold & PAGE MD, check aPTT q2h until <121**"
         holdInfusion = 'Hold & PAGE MD, check aPTT q2h until <121**';
         doseChange = 'DECREASE by 4 units/kg/hr and restart when aPTT <121';
         nextAptt = '6hrs after aPTT <121';
@@ -89,8 +88,3 @@ apttInput.addEventListener('keypress', function(event) {
         getInstructions();
     }
 });
-
-
-
-
-
