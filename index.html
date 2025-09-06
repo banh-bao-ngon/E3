@@ -14,15 +14,49 @@
             <label for="aptt">Enter aPTT value:</label>
             <input type="number" id="aptt" min="0" placeholder="e.g., 85">
             <button onclick="getInstructions()">Get Instructions</button>
-            <br> <a href="heparinQuickGuide-StandardVTE.pdf" download>Download Protocol PDF</a>
+            <br>
+            <a href="heparinQuickGuide-StandardVTE.pdf" download>Download Protocol PDF</a>
         </div>
         <div id="results" class="results-container">
-            </div>
+        </div>
     </div>
 
+    <div class="lab-monitoring-section">
+        <h2>LAB MONITORING</h2>
+        <div class="lab-monitoring-content">
+            <div class="column">
+                <h3>Activated Partial Thromboplastin Time (aPTT)</h3>
+                <ul>
+                    <li>Draw STAT aPTT q6hrs after starting drip</li>
+                    <li>Round aPTT result to nearest whole number</li>
+                    <li>Adjust DOSE based on protocol chart</li>
+                </ul>
+                <h3>aPTT Timing</h3>
+                <ul>
+                    <li>Dose change = count 6 hours from time of dose adjustment</li>
+                    <li>No change = count 6 hours from aPTT result</li>
+                    <li>After 2 consecutive aPTTs at goal range, switch to q24hrs</li>
+                    <li>If daily aPTT is out of range, restart aPTT every 6 hours.</li>
+                </ul>
+            </div>
+            <div class="column">
+                <h3>Discontinuing aPTTs</h3>
+                <ul>
+                    <li>Discontinue aPTT draws once heparin is stopped.</li>
+                </ul>
+                <h3>CBC</h3>
+                <ul>
+                    <li>Draw CBC with platelets the day after heparin starts.</li>
+                    <li>Then, every 3 days minimum while on heparin.</li>
+                </ul>
+                <p class="warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    If unable to draw labs or the patient refuses, notify the provider immediately.
+                </p>
+            </div>
+        </div>
+    </div>
+    
     <script src="heparin.js"></script>
 </body>
 </html>
-
-
-
