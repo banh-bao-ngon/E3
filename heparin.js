@@ -49,7 +49,7 @@ function getInstructions() {
     } else if (apttValue >= 200) {
         bolus = 'None';
         holdInfusion = 'Hold, check aPTT q2h until <121**';
-        doseChange = 'DECREASE by 4 units/kg/hr and restart when aPTT <121';
+        doseChange = 'PAGE MD, DECREASE by 4 units/kg/hr and restart when aPTT <121';
         nextAptt = '6hrs after aPTT <121';
         highlightClass = 'highlight-red';
     } else {
@@ -88,3 +88,4 @@ apttInput.addEventListener('keypress', function(event) {
         getInstructions();
     }
 });
+
