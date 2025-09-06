@@ -2,11 +2,11 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
     color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
     margin: 0;
+    /* Add flexbox to center a main wrapper, not all content */
+    display: flex;
+    justify-content: center;
 }
 
 .container {
@@ -131,4 +131,5 @@ h1 {
 }
 
 /* ... keep the rest of your original CSS ... */
+
 
