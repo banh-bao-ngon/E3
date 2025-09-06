@@ -59,7 +59,7 @@ h1 {
 }
 
 .results-container {
-    margin-top: 10em;
+    margin-top: 5em;
     border-top: 2px solid #eee;
     padding-top: 1.5em;
     text-align: left;
@@ -95,4 +95,5 @@ h1 {
     border-radius: 4px;
     border: 1px solid #f5c6cb;
 }
+
 
