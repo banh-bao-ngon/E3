@@ -1,135 +1,386 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
-    min-height: 100vh;
-    margin: 0;
-    /* Add flexbox to center a main wrapper, not all content */
-    display: flex;
-    justify-content: center;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-blue: #007bff;
+    --primary-green: #28a745;
+    --primary-grey: #6c757d;
+    --light-grey: #f8f9fa;
+    --border-color: #dee2e6;
+    --shadow-color: rgba(0, 0, 0, 0.06);
+    --text-dark: #212529;
+    --text-light: #495057;
 }
 
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f4f8;
+    background-image: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    color: var(--text-dark);
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    min-height: 100vh;
+}
+
+.main-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Tabs and Buttons */
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 2rem;
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+}
+
+.tab-button {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    padding: 0.8rem 1.6rem;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-light);
+    transition: all 0.2s ease-in-out;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+.tab-button:hover:not(.active) {
+    background-color: var(--light-grey);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* --- Unique Colors for Each Active Tab --- */
+.tab-button[data-protocol="heparin"].active {
+    background-color: var(--primary-blue);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    transform: translateY(-2px);
+    border-color: var(--primary-blue);
+}
+
+.tab-button[data-protocol="insulin"].active {
+    background-color: var(--primary-green);
+    color: white;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    transform: translateY(-2px);
+    border-color: var(--primary-green);
+}
+
+.tab-button[data-protocol="other"].active {
+    background-color: var(--primary-grey);
+    color: white;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    transform: translateY(-2px);
+    border-color: var(--primary-grey);
+}
+
+
+.tab-content {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px var(--shadow-color);
+    width: 100%;
+    border: 1px solid #e9ecef;
+}
+
+.protocol-content {
+    display: none;
+}
+
+.protocol-content.active {
+    display: flex;
+    gap: 2rem;
+    padding: 2.5rem;
+}
+
+/* Main Content Area */
 .container {
-    background: #fff;
-    padding: 2em;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 600px;
+    flex: 1; 
+    min-width: 0;
     text-align: center;
 }
 
 h1 {
-    color: #005a8d;
+    color: var(--text-dark);
     margin-top: 0;
+    font-weight: 700;
+    font-size: 2.4rem;
+    margin-bottom: 1rem;
 }
 
 .input-group {
-    margin: 1.5em 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 2.5rem 0;
 }
 
 .input-group label {
-    font-size: 1.1em;
-    margin-right: 0.5em;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-light);
 }
 
 .input-group input {
-    padding: 0.5em;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-    width: 120px;
+    padding: 0.8rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    width: 150px;
     text-align: center;
-    margin-left: 0.5em; /* Added margin-left property */
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.15);
+    outline: none;
 }
 
 .input-group button {
-    padding: 0.6em 1.5em;
-    background-color: #007bff;
+    padding: 0.8rem 1.8rem;
+    background-image: linear-gradient(to right, #007bff, #0056b3);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 1em;
-    margin-left: 0.5em;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
 }
 
 .input-group button:hover {
-    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
 }
 
+.input-group a {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.8rem 1.8rem;
+    border-radius: 8px;
+    border: 1px solid var(--primary-blue);
+}
+
+.input-group a:hover {
+    background-color: var(--primary-blue);
+    color: white;
+}
+
+/* Vertically Layered Inputs for Insulin Adjustment */
+.input-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+    max-width: 450px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    align-items: center;
+    gap: 1rem;
+}
+
+.input-row label {
+    font-weight: 500;
+    text-align: right;
+}
+
+.input-checkbox-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.input-row input {
+    padding: 0.9rem;
+    font-size: 1.1rem;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ced4da;
+}
+
+/* Results Section */
 .results-container {
-    margin-top: 5em;
-    border-top: 2px solid #eee;
-    padding-top: 1.5em;
+    margin-top: 25px;
+}
+
+.result-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
     text-align: left;
+    margin-top: 25px;
 }
 
 .result-item {
-    margin-bottom: 1em;
+    background-color: var(--light-grey);
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    border-left: 5px solid #6c757d;
 }
 
-.result-item h2 {
-    color: #333;
-    font-size: 1.2em;
-    margin-bottom: 0.5em;
+.result-item h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    font-size: 1em;
+    color: var(--text-dark);
 }
 
 .result-item p {
     margin: 0;
-    line-height: 1.5;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--text-light);
 }
 
-.highlight-green {
-    background-color: #d4edda;
-    color: #155724;
-    padding: 0.7em;
-    border-radius: 4px;
-    border: 1px solid #c3e6cb;
+.result-therapeutic {
+    background-color: #e8f5e9;
+    border-left-color: #28a745;
 }
 
-.highlight-red {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 0.7em;
-    border-radius: 4px;
-    border: 1px solid #f5c6cb;
+.result-warning {
+    background-color: #fff3e0;
+    border-left-color: #fd7e14;
 }
 
-/* Add this new section for positioning */
+.result-critical {
+    background-color: #fbe9e7;
+    border-left-color: #dc3545;
+    font-weight: bold;
+}
+
+.result-critical p, .result-critical h3 {
+    color: #b71c1c;
+}
+
+.result-error {
+    color: #dc3545;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Insulin Protocol Info Sections */
+.info-section {
+    text-align: left;
+    padding: 1.2rem 0;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.info-section:last-child {
+    border-bottom: none;
+}
+
+.info-section h3 {
+    margin-bottom: 0.75rem;
+    color: var(--text-dark);
+}
+
+.info-section ul {
+    margin-top: 0;
+    padding-left: 25px;
+    line-height: 1.7;
+}
+
+/* Lab Monitoring / Key Points Sidebar */
 .lab-monitoring-section {
-    position: fixed;
-    top: 20px; /* Adjust this value to set the distance from the top */
-    right: 20px; /* Adjust this value to set the distance from the right */
-    width: 300px; /* Set a fixed width to prevent it from stretching */
-    background-color: #f9f9f9;
-    padding: 1em;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 320px;
+    flex-shrink: 0;
+    background-color: var(--light-grey);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    font-size: 0.95rem;
+    height: fit-content;
 }
 
 .lab-monitoring-section h2 {
-    background-color: #005a8d;
+    background-color: #343a40;
     color: white;
-    padding: 0.5em 1em;
-    margin: -1em -1em 1em -1em;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    padding: 0.8rem 1.2rem;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
 }
 
 .lab-monitoring-content {
     display: flex;
-    flex-direction: column; /* Use a column layout for the content */
-    gap: 1em;
+    flex-direction: column;
+    gap: 1.2em;
 }
 
-/* You can remove the column class from the HTML and this styling from the CSS, 
-   as we are no longer using columns. */
-.lab-monitoring-content .column {
-    /* Styles can be removed or adjusted */
+.lab-monitoring-content h3 {
+    font-size: 1em;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
 }
 
-/* ... keep the rest of your original CSS ... */
+.lab-monitoring-content ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-top: 0;
+}
 
+.lab-monitoring-content li {
+    margin-bottom: 0.6rem;
+    line-height: 1.5;
+    color: var(--text-light);
+}
+
+.lab-monitoring-content li.critical-warning {
+    color: #c0392b;
+    font-weight: 600;
+}
+
+.lab-monitoring-content .warning {
+    color: #d9534f;
+    font-style: italic;
+    margin-top: 1.5rem;
+    font-weight: 500;
+}
+
+/* Responsive Styling */
+@media (max-width: 992px) {
+    .protocol-content.active {
+        flex-direction: column;
+    }
+
+    .lab-monitoring-section {
+        width: auto;
+        margin-top: 2rem;
+    }
+    
+    .input-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .input-grid label {
+        justify-self: center;
+    }
+}
 
