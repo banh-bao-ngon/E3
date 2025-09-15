@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Protocols Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+</head>
+<body>
+<!-- Clinical Disclaimer Banner -->
+<div id="disclaimer-banner" class="disclaimer-banner">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>This tool is for clinical reference only. Always use clinical judgment and verify calculations independently.</span>
+    <button onclick="acceptDisclaimer()" class="accept-btn">I Understand</button>
+</div>
+
+<!-- Dark Mode Toggle -->
+<button id="dark-mode-toggle" class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+    <i class="fas fa-moon"></i>
+</button>
+
+<!-- History Panel -->
+<button id="history-toggle" class="history-toggle" onclick="toggleHistory()" title="Calculation History">
+    <i class="fas fa-history"></i>
+    <span class="history-count" id="history-count">0</span>
+</button>
+
+<div id="history-panel" class="history-panel">
+    <div class="history-header">
+        <h3>Calculation History</h3>
+        <button onclick="clearHistory()" class="clear-history-btn">Clear All</button>
+    </div>
+    <div id="history-content" class="history-content">
+        <p class="history-empty">No calculations yet</p>
+    </div>
+</div>
+
+ <div class="main-wrapper">
+     <div class="tabs">
+         <button class="tab-button active" data-protocol="heparin">Heparin Protocol</button>
+         <button class="tab-button" data-protocol="insulin">Insulin Protocol</button>
+         <button class="tab-button" data-protocol="gemini-ai">Dat AI Assistant</button>
+         <button class="tab-button" data-protocol="other">Other Protocols</button>
+     </div>
+
+     <div class="tab-content">
+         <!-- Heparin Protocol Tab -->
+         <div id="heparin-protocol-content" class="protocol-content active">
+             <div class="container">
+                 <h1>Heparin Anticoagulation Protocol</h1>
+                 <div class="input-group">
+                     <label for="heparin-aptt">Enter aPTT value:</label>
+                     <input type="number" id="heparin-aptt" min="0" max="500" placeholder="e.g., 85">
+                     <button onclick="getHeparinInstructions()">Get Instructions</button>
+                     <a href="heparinQuickGuide-StandardVTE.pdf" download>Download Protocol PDF</a>
+                 </div>
+                 <div id="heparin-results" class="results-container">
+                 </div>
+             </div>
+             <div class="lab-monitoring-section">
+                 <h2>LAB MONITORING</h2>
+                 <div class="lab-monitoring-content">
+                     <div class="column">
+                         <h3>Activated Partial Thromboplastin Time (aPTT)</h3>
+                         <ul>
+                             <li>Draw STAT aPTT q6hrs after starting drip</li>
+                             <li>Round aPTT result to nearest whole number</li>
+                             <li>Adjust DOSE based on protocol chart</li>
+                         </ul>
+                         <h3>aPTT Timing</h3>
+                         <ul>
+                             <li><strong>Dose change:</strong> count 6 hours from time of dose adjustment.</li>
+                             <li><strong>No change:</strong> count 6 hours from aPTT result time.</li>
+                             <li>After 2 consecutive therapeutic aPTTs, switch to daily draws.</li>
+                             <li>If a daily aPTT is out of range, restart q6hr draws.</li>
+                         </ul>
+                         <h3>Discontinuing aPTTs</h3>
+                         <ul>
+                             <li>Discontinue aPTT draws once heparin is stopped.</li>
+                         </ul>
+                         <h3>CBC</h3>
+                         <ul>
+                             <li>Draw CBC with platelets the day after heparin start.</li>
+                             <li>Then, every 3 days minimum while on heparin.</li>
+                         </ul>
+                         <p class="warning">
+                             <i class="fas fa-exclamation-triangle"></i>
+                             If unable to draw labs or patient refuses, notify provider immediately.
+                         </p>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Insulin Protocol Tab -->
+         <div id="insulin-protocol-content" class="protocol-content">
+             <div class="container">
+                 <h1>Insulin Protocol</h1>
+                 <div class="input-group">
+                     <label for="insulin-protocol-select">Select Protocol:</label>
+                     <select id="insulin-protocol-select">
+                         <option value="non-dka-hhs">Non-DKA/HHS Insulin Drip</option>
+                         <option value="dka-hhs">DKA/HHS Insulin Drip</option>
+                     </select>
+                 </div>
+
+                 <!-- NON-DKA/HHS PROTOCOL -->
+                 <div id="non-dka-hhs-protocol" style="display: block;">
+                      <div class="input-group">
+                         <a href="Insulin_Non-DKA_122020.pdf" download>Download Protocol PDF</a>
+                     </div>
+                     <h2>Goal Blood Glucose: 140-180 mg/dL</h2>
+                     <div class="info-section">
+                         <h3>Calculation of Initial Infusion Rate</h3>
+                         <div class="input-group">
+                             <label for="insulin-bg">Enter Current BG (mg/dL):</label>
+                             <input type="number" id="insulin-bg" min="0" max="1500" placeholder="e.g., 210">
+                             <button onclick="calculateInsulinRate()">Calculate Rate</button>
+                         </div>
+                         <div id="insulin-rate-results" class="results-container"></div>
+                     </div>
+                     <div class="info-section">
+                         <h3>Optional Initial Bolus</h3>
+                         <ul>
+                             <li>Administer initial bolus equal to starting rate of infusion (e.g., starting rate 3 units per hour, bolus= 3 units) <b>REQUIRES PHYSICIAN ORDER</b></li>
+                             <li>Do not administer an additional bolus if insulin infusion has already started (e.g., insulin infusion started in the Emergency Department prior to admission)</li>
+                         </ul>
+                     </div>
+                     <div class="info-section">
+                         <h3>Adjustment of Existing Infusion Rate</h3>
+                         <p class="section-subtitle"><strong>Remember hourly BG checks</strong>.</p>
+                         <div class="input-stack">
+                             <div class="input-row">
+                                 <label for="current-rate">Current Rate (units/hr):</label>
+                                 <input type="number" id="current-rate" min="0" max="100" step="0.1" placeholder="e.g., 3.5">
+                             </div>
+                             <div class="input-row" id="previous-bg-row" style="display: none;">
+                                 <label for="previous-bg">Previous BG (mg/dL):</label>
+                                 <input type="number" id="previous-bg" min="0" max="1500" placeholder="e.g., 250">
+                             </div>
+                             <div class="input-row">
+                                 <label for="current-bg-adj">Current BG (mg/dL):</label>
+                                 <input type="number" id="current-bg-adj" min="0" max="1500" placeholder="e.g., 210">
+                             </div>
+                             <div class="input-checkbox-row">
+                                <label for="type-1-dm">Type 1 DM:</label>
+                                <input type="checkbox" id="type-1-dm" class="align-checkbox">
+                            </div>
+                         </div>
+                         <div class="input-group">
+                              <button onclick="calculateInsulinAdjustment()">Calculate Adjustment</button>
+                         </div>
+                         <div id="insulin-adjustment-results" class="results-container"></div>
+                     </div>
+                 </div>
+                 
+                 <!-- DKA/HHS PROTOCOL (Initially Hidden) -->
+                 <div id="dka-hhs-protocol" style="display: none;">
+                    <div class="dka-phase-tabs">
+                        <button class="dka-phase-button active" data-dka-phase="phase1">Phase 1</button>
+                        <button class="dka-phase-button" data-dka-phase="transition">Transition Phase</button>
+                        <button class="dka-phase-button" data-dka-phase="phase2">Phase 2</button>
+                    </div>
+                    <div class="input-group">
+                        <a href="Insulin_DKA-HHS_032019.pdf" download>Download Protocol PDF</a>
+                    </div>
+
+                    <div id="dka-phase1-content" class="dka-phase-content active">
+                        <div class="info-section">
+                            <h3>Phase 1: Initiation</h3>
+                            <p class="section-subtitle">Start infusion at 0.1 units/kg/hour.</p>
+                            <div class="input-stack">
+                                <div class="input-row">
+                                    <label for="phase1-initiation-weight">Patient Weight (kg):</label>
+                                    <input type="number" id="phase1-initiation-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <button onclick="calculateDkaInitiation()">Calculate Initial Rate</button>
+                            </div>
+                            <div id="phase1-initiation-results" class="results-container"></div>
+                        </div>
+                        <div class="info-section">
+                            <h3>Phase 1: Continuation (BG > 250)</h3>
+                            <p class="section-subtitle">Adjust hourly based on BG drop after the first hour.</p>
+                            <div class="input-stack">
+                                <div class="input-row">
+                                    <label for="phase1-current-rate">Current Rate (units/hr):</label>
+                                    <input type="number" id="phase1-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0">
+                                </div>
+                                <div class="input-row">
+                                    <label for="phase1-rate-change">BG Drop (mg/dL/hr):</label>
+                                    <input type="number" id="phase1-rate-change" min="0" max="500" placeholder="e.g., 60">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <button onclick="calculateDkaPhase1Continuation()">Calculate Adjustment</button>
+                            </div>
+                            <div id="phase1-continuation-results" class="results-container"></div>
+                        </div>
+                    </div>
+
+                    <div id="dka-transition-content" class="dka-phase-content">
+                        <div class="info-section">
+                            <h3>Transition Phase</h3>
+                             <p class="section-subtitle">Calculate the reduced rate for BG ≤ 250 mg/dL.</p>
+                             <div class="phase-gate">
+                                <i class="fas fa-arrow-down"></i>
+                                <p>Proceed to Transition Phase ONLY when Blood Glucose is <strong>≤ 250 mg/dL</strong>.</p>
+                             </div>
+                             <div class="input-stack">
+                                <div class="input-row">
+                                    <label for="transition-weight">Patient Weight (kg):</label>
+                                    <input type="number" id="transition-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                                </div>
+                                <div class="input-row">
+                                    <label for="transition-current-rate">Current Rate (units/hr):</label>
+                                    <input type="number" id="transition-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <button onclick="calculateDkaTransition()">Calculate Transition</button>
+                            </div>
+                            <div id="transition-results" class="results-container"></div>
+                        </div>
+                    </div>
+
+                    <div id="dka-phase2-content" class="dka-phase-content">
+                        <div class="info-section">
+                            <h3>Phase 2: Titration</h3>
+                            <p class="section-subtitle">Goal BG is 150-200 mg/dL.</p>
+                             <div class="input-stack">
+                                <div class="input-row">
+                                    <label for="phase2-current-rate">Current Rate (units/hr):</label>
+                                    <input type="number" id="phase2-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 3.5">
+                                </div>
+                                <div class="input-row">
+                                    <label for="phase2-current-bg">Current BG (mg/dL):</label>
+                                    <input type="number" id="phase2-current-bg" min="0" max="1500" placeholder="e.g., 180">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <button onclick="calculateDkaPhase2()">Calculate Phase 2</button>
+                            </div>
+                            <div id="phase2-results" class="results-container"></div>
+                        </div>
+                    </div>
+                 </div>
+             </div>
+             <!-- Sidebars for Insulin Protocols -->
+             <div id="non-dka-sidebar" style="display: block;">
+                 <div class="lab-monitoring-section">
+                     <h2>Key Points</h2>
+                     <div class="lab-monitoring-content">
+                         <div class="column">
+                             <h3>Monitoring</h3>
+                             <ul>
+                                 <li>Check blood glucose <strong>hourly</strong>.</li>
+                                 <li>If stable in target range (140-180mg/dL) for 4 hrs, decrease to <strong>every 2 hours</strong> BG checks.</li>
+                                 <li>Check BMP at baseline and <strong>every 4 hours</strong> during infusion.</li>
+                             </ul>
+                             <h3>Safety & Prerequisites</h3>
+                             <ul>
+                                 <li class="critical-warning">Do NOT start infusion if potassium is <strong>&lt; 3.3 mEq/L</strong>.</li>
+                                 <li>Investigate any unexplained hypo or hyperglycemia.</li>
+                             </ul>
+                             <h3>Adjustments & Special Situations</h3>
+                             <ul>
+                                 <li>Adjust insulin for any changes in glucose source (diet, TPN, etc.).</li>
+                                 <li>If a glucose source is held, <strong>reduce insulin rate by 50%</strong> and perform hourly BG checks.</li>
+                                 <li>If transport, <strong>titrate/protocol + hourly BG checks</strong> or <strong>turn infusion OFF</strong> if monitoring isn't possible and resume protocol when return to.</li>
+                                 <li>Ensure an alternative glycemic plan is ordered before discontinuing the infusion.</li>
+                             </ul>
+                             <h3>Discontinuing Infusion</h3>
+                             <ul>
+                                 <li>Consider switching to subcutaneous insulin when BG is stable (100-180 mg/dL) for 6+ hours.</li>
+                                 <li><strong>Overlap:</strong> Administer subcutaneous insulin 1-2 hours <strong>before</strong> stopping the infusion.</li>
+                                 <li><strong>NPO Patients:</strong> Give 80% of the 24hr infusion total as a long-acting basal dose.</li>
+                                 <li><strong>PO Intake:</strong> Give 50% of the 24hr infusion total as a basal dose and start mealtime insulin.</li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+             <div id="dka-sidebar" style="display: none;">
+                 <div class="lab-monitoring-section">
+                    <h2>Key Points: DKA/HHS</h2>
+                    <div class="lab-monitoring-content">
+                        <div class="column">
+                            <h3>Safety & Prerequisites</h3>
+                            <ul>
+                                <li class="critical-warning">Do not start insulin until K+ is > 3.3 mEq/L.</li>
+                                <li>Use only Blue Low Sorbing infusion set (prime with 20mL).</li>
+                                <li>Change tubing q24hr with new solution bag.</li>
+                                <li class="critical-warning">Avoid transitioning off infusion overnight.</li>
+                            </ul>
+                            <h3>Monitoring & Labs</h3>
+                            <ul>
+                                <li>Check blood glucose <strong>hourly</strong>.</li>
+                                <li>Draw labs STAT q2h until K+ is stable (4.0-5.0) for 4h, then q4h.</li>
+                                <li>Check BG at discontinuation and 2 hours post-discontinuation.</li>
+                            </ul>
+                             <h3>Rate Adjustments & Special Situations</h3>
+                             <ul>
+                                <li>Notify provider if rate is > 20 units/hr or < 2.0 units/hr for 4 hours.</li>
+                                <li>When BG < 150 mg/dL: increase D5½NS to 150 mL/hr and check BG in 1 hour. Call MD if still < 150.</li>
+                             </ul>
+                            <h3>Discontinuing Infusion</h3>
+                            <ul>
+                                <li>Call physician when anion gap < 12 for 4 hours (2 chemistries) to consider transition.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <div class="lab-monitoring-section" style="margin-top: 2rem;">
+                     <h3>Bolus (if ordered)</h3>
+                     <div class="input-checkbox-row" style="justify-content: center; margin-bottom: 1rem;">
+                         <label for="show-bolus-calc">Calculate Bolus?</label>
+                         <input type="checkbox" id="show-bolus-calc" class="align-checkbox">
+                     </div>
+                     <div id="bolus-calculator-content" style="display: none;">
+                         <p class="section-subtitle">Calculates Regular insulin at 0.1 units/kg (Max 10 units) and includes a weight converter.</p>
+                         <div class="input-stack">
+                             <div class="input-row">
+                                 <label for="lbs-input">Pounds (lbs):</label>
+                                 <input type="number" id="lbs-input" placeholder="e.g., 154">
+                             </div>
+                             <div class="input-row">
+                                 <label for="kg-input">Kilograms (kg):</label>
+                                 <input type="number" id="kg-input" placeholder="e.g., 70">
+                             </div>
+                             <hr>
+                             <div class="input-row">
+                                 <label for="bolus-weight">Patient Weight (kg):</label>
+                                 <input type="number" id="bolus-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                             </div>
+                         </div>
+                         <div class="input-group">
+                             <button onclick="calculateDkaBolus()">Calculate Bolus</button>
+                         </div>
+                         <div id="bolus-results" class="results-container"></div>
+                    </div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- AI Assistant Tab -->
+        <div id="gemini-ai-protocol-content" class="protocol-content">
+            <div class="container">
+                <h1>Dat AI Clinical Assistant</h1>
+                <div class="ai-disclaimer">
+                    <i class="fas fa-info-circle"></i>
+                    <p><strong>Important:</strong> This AI assistant is for supplementary information only. It does not replace clinical judgment or professional medical advice. Always verify information independently.</p>
+                </div>
+                
+                <!-- API Key Setup -->
+                <div id="api-key-setup" class="api-key-setup">
+                    <h3>Setup AI Assistant</h3>
+                    <p>Enter your Gemini API key to enable the AI assistant:</p>
+                    <div class="api-key-input-group">
+                        <input type="password" id="api-key-input" placeholder="Enter your Gemini API key">
+                        <button onclick="saveApiKey()">Save Key</button>
+                    </div>
+                    <p class="api-key-help">
+                        <a href="https://makersuite.google.com/app/apikey" target="_blank">Get your API key from Google AI Studio</a>
+                    </p>
+                </div>
+
+                <div id="chat-interface" class="chat-interface" style="display: none;">
+                    <div class="chat-container">
+                        <div class="chat-box" id="gemini-chat-box">
+                            <div class="chat-message bot-message">
+                                <p>Hello! I'm an AI assistant for clinical information. Remember, I'm supplementary only - always use your clinical judgment and verify any information independently.</p>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="gemini-input" placeholder="Ask a clinical question...">
+                            <button id="gemini-send-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                        <button onclick="changeApiKey()" class="change-key-btn">Change API Key</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+         <!-- Other Protocols Tab -->
+         <div id="other-protocol-content" class="protocol-content">
+             <div class="container">
+                 <h1>Other Protocols & Tools</h1>
+                 <div class="info-section">
+                     <h3>Weight Converter</h3>
+                     <div class="input-stack">
+                         <div class="input-row">
+                             <label for="other-lbs-input">Pounds (lbs):</label>
+                             <input type="number" id="other-lbs-input" min="0" max="1000" step="0.1" placeholder="e.g., 154">
+                         </div>
+                         <div class="input-row">
+                             <label for="other-kg-input">Kilograms (kg):</label>
+                             <input type="number" id="other-kg-input" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                         </div>
+                     </div>
+                 </div>
+                 <div class="info-section">
+                     <h3>Quick References</h3>
+                     <ul>
+                         <li>Normal aPTT Range: 25-35 seconds</li>
+                         <li>Therapeutic aPTT for Heparin: 70-90 seconds</li>
+                         <li>Normal Blood Glucose: 70-100 mg/dL (fasting)</li>
+                         <li>Target BG for Non-DKA Protocol: 140-180 mg/dL</li>
+                         <li>Target BG for DKA Protocol Phase 2: 150-200 mg/dL</li>
+                     </ul>
+                 </div>
+             </div>
+         </div>
+         
+     </div> <!-- This closes .tab-content -->
+ </div> <!-- This closes .main-wrapper -->
+
+ <!-- Confirmation Modal -->
+ <div id="confirmation-modal" class="modal">
+     <div class="modal-content">
+         <h3><i class="fas fa-exclamation-triangle"></i> Confirm Critical Calculation</h3>
+         <p id="confirmation-message"></p>
+         <div class="modal-values" id="modal-values"></div>
+         <p class="modal-warning">Please verify these values before proceeding. This calculation will be logged.</p>
+         <div class="modal-buttons">
+             <button onclick="confirmCalculation()" class="confirm-btn">Confirm & Calculate</button>
+             <button onclick="cancelCalculation()" class="cancel-btn">Cancel</button>
+         </div>
+     </div>
+ </div>
+
+ <script src="logic.js"></script>
+ <script>
+     // Register Service Worker for offline capability
+     if ('serviceWorker' in navigator) {
+         navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed'));
+     }
+ </script>
+</body>
+</html>
