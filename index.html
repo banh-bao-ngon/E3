@@ -120,6 +120,17 @@
         <div class="graph-container">
             <canvas id="tracking-chart" width="350" height="200"></canvas>
         </div>
+        <div class="data-management">
+            <h5><i class="fas fa-trash-alt"></i> Data Management</h5>
+            <div class="data-clear-buttons">
+                <button onclick="clearTrackingData('bg')" class="clear-btn clear-bg">Clear BG Data</button>
+                <button onclick="clearTrackingData('rates')" class="clear-btn clear-rates">Clear Rate Data</button>
+                <button onclick="clearTrackingData('all')" class="clear-btn clear-all">Clear All Data</button>
+            </div>
+            <div class="data-summary">
+                <span id="data-summary-text">Loading data summary...</span>
+            </div>
+        </div>
     </div>
 
     <!-- Active Flags -->
