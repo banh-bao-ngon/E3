@@ -6,6 +6,7 @@
     <title>Clinical Protocols Calculator</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
 </head>
@@ -33,6 +34,12 @@
     <i class="fas fa-comment-dots"></i>
 </button>
 
+<!-- Monitoring Panel Toggle -->
+<button id="monitoring-toggle" class="monitoring-toggle" onclick="toggleMonitoringPanel()" title="Monitoring & Alerts">
+    <i class="fas fa-chart-line"></i>
+    <span class="flag-badge" id="flag-badge" style="display: none;"></span>
+</button>
+
 <div id="history-panel" class="history-panel">
     <div class="history-header">
         <h3>Calculation History</h3>
@@ -46,10 +53,82 @@
     </div>
 </div>
 
+<!-- Monitoring Panel -->
+<div id="monitoring-panel" class="monitoring-panel">
+    <div class="monitoring-header">
+        <h3>Clinical Monitoring</h3>
+        <button onclick="toggleMonitoringPanel()" class="close-monitoring-btn" title="Close Panel">&times;</button>
+    </div>
+
+    <!-- Timer Section -->
+    <div class="monitoring-section">
+        <h4><i class="fas fa-clock"></i> Assessment Timer</h4>
+        <div class="timer-controls">
+            <div class="timer-display-container">
+                <div id="timer-display" class="timer-display">60:00</div>
+                <div id="target-time-display" class="target-time">Target: --:--:--</div>
+            </div>
+            <div class="timer-buttons">
+                <button id="timer-start-btn" onclick="startTimer()" class="timer-btn timer-start">Start</button>
+                <button id="timer-stop-btn" onclick="stopTimer()" class="timer-btn timer-stop" disabled>Stop</button>
+                <button id="timer-reset-btn" onclick="resetTimer()" class="timer-btn timer-reset">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monitoring Status -->
+    <div class="monitoring-section">
+        <h4><i class="fas fa-chart-bar"></i> Status</h4>
+        <div id="monitoring-status" class="monitoring-status">
+            <div class="status-item">
+                <span class="status-label">Total Readings:</span>
+                <span class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Active Flags:</span>
+                <span class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Timer:</span>
+                <span class="status-value">Stopped</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracking Graph -->
+    <div class="monitoring-section">
+        <h4><i class="fas fa-chart-line"></i> Tracking Data</h4>
+        <div class="graph-controls">
+            <select id="graph-type-select" onchange="updateGraph()">
+                <option value="bg">Blood Glucose</option>
+                <option value="rate">Infusion Rate</option>
+                <option value="both">Both</option>
+            </select>
+            <select id="graph-timeframe-select" onchange="updateGraph()">
+                <option value="6">Last 6 Hours</option>
+                <option value="12">Last 12 Hours</option>
+                <option value="24">Last 24 Hours</option>
+            </select>
+        </div>
+        <div class="graph-container">
+            <canvas id="tracking-chart" width="350" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Active Flags -->
+    <div class="monitoring-section">
+        <h4><i class="fas fa-exclamation-triangle"></i> Active Alerts</h4>
+        <div id="flags-container" class="flags-container">
+            <p class="no-flags">No active alerts</p>
+        </div>
+    </div>
+</div>
+
  <div class="main-wrapper">
      <div class="tabs">
          <button class="tab-button active" data-protocol="heparin">Heparin Protocol</button>
          <button class="tab-button" data-protocol="insulin">Insulin Protocol</button>
+         <button class="tab-button" data-protocol="calculator">Calculator</button>
          <button class="tab-button" data-protocol="gemini-ai">Dat AI Assistant</button>
          <button class="tab-button" data-protocol="other">Other Protocols</button>
      </div>
@@ -358,6 +437,67 @@
              </div>
          </div>
 
+         <!-- Calculator Tab -->
+         <div id="calculator-protocol-content" class="protocol-content">
+             <div class="container">
+                 <h1>Calculator Tools</h1>
+
+                 <div class="calculator-sections">
+                     <!-- Weight Converter Section -->
+                     <div class="calc-section">
+                         <h2><i class="fas fa-weight-hanging"></i> Weight Converter</h2>
+                         <div class="weight-converter">
+                             <div class="input-group">
+                                 <label for="calc-lbs-input">Pounds (lbs):</label>
+                                 <input type="number" id="calc-lbs-input" placeholder="Enter weight in pounds" step="0.1">
+                             </div>
+                             <div class="conversion-arrow">
+                                 <i class="fas fa-exchange-alt"></i>
+                             </div>
+                             <div class="input-group">
+                                 <label for="calc-kg-input">Kilograms (kg):</label>
+                                 <input type="number" id="calc-kg-input" placeholder="Enter weight in kilograms" step="0.1">
+                             </div>
+                         </div>
+                     </div>
+
+                     <!-- Basic Math Calculator Section -->
+                     <div class="calc-section">
+                         <h2><i class="fas fa-calculator"></i> Basic Calculator</h2>
+                         <div class="basic-calculator">
+                             <div class="calc-display">
+                                 <input type="text" id="calc-display" readonly placeholder="0">
+                             </div>
+                             <div class="calc-buttons">
+                                 <button class="calc-btn calc-clear" onclick="clearCalculator()">C</button>
+                                 <button class="calc-btn calc-clear" onclick="clearEntry()">CE</button>
+                                 <button class="calc-btn calc-operator" onclick="appendToDisplay('/')" title="Divide">÷</button>
+                                 <button class="calc-btn calc-operator" onclick="appendToDisplay('*')" title="Multiply">×</button>
+
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('7')">7</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('8')">8</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('9')">9</button>
+                                 <button class="calc-btn calc-operator" onclick="appendToDisplay('-')" title="Subtract">-</button>
+
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('4')">4</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('5')">5</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('6')">6</button>
+                                 <button class="calc-btn calc-operator" onclick="appendToDisplay('+')" title="Add">+</button>
+
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('1')">1</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('2')">2</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('3')">3</button>
+                                 <button class="calc-btn calc-equals" onclick="calculateResult()" rowspan="2" title="Equals">=</button>
+
+                                 <button class="calc-btn calc-number calc-zero" onclick="appendToDisplay('0')">0</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('.')">.</button>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
          <!-- AI Assistant Tab -->
         <div id="gemini-ai-protocol-content" class="protocol-content">
             <div class="container">
@@ -400,29 +540,60 @@
          <!-- Other Protocols Tab -->
          <div id="other-protocol-content" class="protocol-content">
              <div class="container">
-                 <h1>Other Protocols & Tools</h1>
-                 <div class="info-section">
-                     <h3>Weight Converter</h3>
-                     <div class="input-stack">
-                         <div class="input-row">
-                             <label for="other-lbs-input">Pounds (lbs):</label>
-                             <input type="number" id="other-lbs-input" min="0" max="1000" step="0.1" placeholder="e.g., 154">
+                 <h1>Other Protocols</h1>
+
+                 <div class="coming-soon-section">
+                     <div class="coming-soon-content">
+                         <i class="fas fa-clock fa-3x"></i>
+                         <h2>Additional Protocols Coming Soon</h2>
+                         <p>This section will be updated with additional clinical protocols and tools to support healthcare providers.</p>
+
+                         <div class="planned-features">
+                             <h3>Planned Features:</h3>
+                             <ul>
+                                 <li><i class="fas fa-heart"></i> Cardiac Protocols</li>
+                                 <li><i class="fas fa-lungs"></i> Respiratory Protocols</li>
+                                 <li><i class="fas fa-prescription-bottle-alt"></i> Medication Dosing Guidelines</li>
+                                 <li><i class="fas fa-chart-pie"></i> Laboratory Reference Ranges</li>
+                                 <li><i class="fas fa-file-medical"></i> Emergency Protocols</li>
+                             </ul>
                          </div>
-                         <div class="input-row">
-                             <label for="other-kg-input">Kilograms (kg):</label>
-                             <input type="number" id="other-kg-input" min="0" max="500" step="0.1" placeholder="e.g., 70">
+
+                         <div class="update-notice">
+                             <p><strong>Note:</strong> Content updates will be implemented based on clinical needs and user feedback.</p>
                          </div>
                      </div>
                  </div>
+
+                 <!-- Quick Reference Section -->
                  <div class="info-section">
-                     <h3>Quick References</h3>
-                     <ul>
-                         <li>Normal aPTT Range: 25-35 seconds</li>
-                         <li>Therapeutic aPTT for Heparin: 70-90 seconds</li>
-                         <li>Normal Blood Glucose: 70-100 mg/dL (fasting)</li>
-                         <li>Target BG for Non-DKA Protocol: 140-180 mg/dL</li>
-                         <li>Target BG for DKA Protocol Phase 2: 150-200 mg/dL</li>
-                     </ul>
+                     <h3><i class="fas fa-info-circle"></i> Quick Clinical References</h3>
+                     <div class="reference-grid">
+                         <div class="reference-card">
+                             <h4>Heparin Therapy</h4>
+                             <ul>
+                                 <li>Normal aPTT: 25-35 seconds</li>
+                                 <li>Therapeutic aPTT: 70-90 seconds</li>
+                                 <li>Critical aPTT: >100 seconds</li>
+                             </ul>
+                         </div>
+                         <div class="reference-card">
+                             <h4>Blood Glucose</h4>
+                             <ul>
+                                 <li>Normal (fasting): 70-100 mg/dL</li>
+                                 <li>Non-DKA Target: 140-180 mg/dL</li>
+                                 <li>DKA Phase 2 Target: 150-200 mg/dL</li>
+                             </ul>
+                         </div>
+                         <div class="reference-card">
+                             <h4>Insulin Protocols</h4>
+                             <ul>
+                                 <li>Hypoglycemia: BG < 70 mg/dL</li>
+                                 <li>Critical High: BG > 600 mg/dL</li>
+                                 <li>Maximum Rate: 20 units/hr (notify provider)</li>
+                             </ul>
+                         </div>
+                     </div>
                  </div>
              </div>
          </div>
