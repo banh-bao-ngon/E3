@@ -1489,6 +1489,120 @@ h1 {
     height: 100% !important;
 }
 
+/* Data Management Styles */
+.data-management {
+    background: var(--light-grey);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+}
+
+.data-management h5 {
+    margin: 0 0 0.75rem 0;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.data-clear-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.clear-btn {
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.clear-bg {
+    background: #ffeaa7;
+    color: #d63031;
+    border: 1px solid #fdcb6e;
+}
+
+.clear-rates {
+    background: #74b9ff;
+    color: white;
+    border: 1px solid #0984e3;
+}
+
+.clear-all {
+    background: #fd79a8;
+    color: white;
+    border: 1px solid #e84393;
+}
+
+.clear-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+.clear-bg:hover {
+    background: #fdcb6e;
+}
+
+.clear-rates:hover {
+    background: #0984e3;
+}
+
+.clear-all:hover {
+    background: #e84393;
+}
+
+.data-summary {
+    text-align: center;
+    padding: 0.5rem;
+    background: var(--bg-card);
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+.data-summary-empty {
+    color: var(--text-light);
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+.data-summary-active {
+    color: var(--primary-blue);
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+/* Dark mode support for data management */
+body.dark-mode .data-management {
+    background: var(--light-grey);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .data-summary {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+/* Mobile responsiveness for data management */
+@media (max-width: 768px) {
+    .data-clear-buttons {
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+    }
+
+    .clear-btn {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+}
+
 /* Flags Container */
 .flags-container {
     max-height: 300px;
