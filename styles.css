@@ -31,36 +31,16 @@ body.dark-mode {
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-main);
+    background-image: linear-gradient(to bottom, var(--bg-main), var(--bg-main));
     color: var(--text-dark);
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
     min-height: 100vh;
     transition: all 0.3s ease;
-    display: flex; /* Flexbox for layout */
-    flex-direction: column; /* Stack children vertically */
+    display: flex;
+    flex-direction: column;
 }
-.main-wrapper {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    flex-grow: 1; /* Allows the main content to grow and fill space */
-    padding-top: 60px;
-}
-
-/* --- FOOTER STYLES --- */
-.site-footer {
-    text-align: center;
-    padding: 2rem 0;
-    margin-top: 2rem;
-    color: var(--text-light);
-    font-size: 0.9em;
-    border-top: 1px solid var(--border-color);
-}
-.site-footer p {
-    margin: 0.25rem 0;
-}
-
 
 /* Disclaimer Banner */
 .disclaimer-banner {
@@ -128,10 +108,9 @@ body {
     color: var(--text-dark);
 }
 
-/* History Panel */
-.history-toggle {
+/* Floating Action Buttons: History & Feedback */
+.history-toggle, .feedback-toggle {
     position: fixed;
-    top: 130px;
     right: 20px;
     background: var(--bg-card);
     border: 2px solid var(--border-color);
@@ -147,7 +126,15 @@ body {
     box-shadow: 0 2px 10px var(--shadow-color);
 }
 
-.history-toggle:hover {
+.history-toggle {
+    top: 130px;
+}
+
+.feedback-toggle {
+    top: 190px; /* Positioned below the history button */
+}
+
+.history-toggle:hover, .feedback-toggle:hover {
     transform: scale(1.1);
 }
 
@@ -284,13 +271,18 @@ body {
 }
 
 .modal-content h3 {
-    color: var(--primary-red);
+    color: var(--text-dark);
     margin-top: 0;
 }
 
 .modal-content h3 i {
     margin-right: 10px;
+    color: var(--primary-blue);
 }
+.modal-content h3.critical-header i {
+    color: var(--primary-red);
+}
+
 
 .modal-values {
     background: var(--light-grey);
@@ -340,6 +332,40 @@ body {
 .cancel-btn:hover {
     background: #5a6268;
 }
+
+/* Feedback Form Styles */
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+.feedback-form-row {
+    display: flex;
+    gap: 1rem;
+}
+.feedback-form-row input {
+    width: 50%;
+}
+
+.feedback-form input,
+.feedback-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    background: var(--light-grey);
+    color: var(--text-dark);
+    box-sizing: border-box;
+}
+
+.feedback-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
 
 /* AI Assistant Styles */
 .ai-disclaimer {
@@ -516,6 +542,14 @@ body {
 }
 
 /* Original Styles (preserved) */
+.main-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 60px;
+}
+
+/* Tabs and Buttons */
 .tabs {
     display: flex;
     flex-wrap: wrap;
@@ -1190,5 +1224,16 @@ h1 {
         outline: 3px solid var(--primary-red);
     }
 }
+
+.site-footer {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 2rem;
+    color: var(--text-light);
+    font-size: 0.9em;
+    border-top: 1px solid var(--border-color);
+}
+.site-footer p {
+    margin: 0.25rem 0;
 }
 
