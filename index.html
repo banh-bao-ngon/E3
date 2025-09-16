@@ -22,10 +22,15 @@
     <i class="fas fa-moon"></i>
 </button>
 
-<!-- History Panel -->
+<!-- History Panel Toggle -->
 <button id="history-toggle" class="history-toggle" onclick="toggleHistory()" title="Calculation History">
     <i class="fas fa-history"></i>
     <span class="history-count" id="history-count">0</span>
+</button>
+
+<!-- Feedback Button -->
+<button id="feedback-toggle" class="feedback-toggle" onclick="toggleFeedback()" title="Leave Feedback">
+    <i class="fas fa-comment-dots"></i>
 </button>
 
 <div id="history-panel" class="history-panel">
@@ -426,7 +431,7 @@
  <!-- Confirmation Modal -->
  <div id="confirmation-modal" class="modal">
      <div class="modal-content">
-         <h3><i class="fas fa-exclamation-triangle"></i> Confirm Critical Calculation</h3>
+         <h3 class="critical-header"><i class="fas fa-exclamation-triangle"></i> Confirm Critical Calculation</h3>
          <p id="confirmation-message"></p>
          <div class="modal-values" id="modal-values"></div>
          <p class="modal-warning">Please verify these values before proceeding. This calculation will be logged.</p>
@@ -436,6 +441,28 @@
          </div>
      </div>
  </div>
+
+ <!-- Feedback Modal -->
+<div id="feedback-modal" class="modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-comment-dots"></i> Provide Feedback</h3>
+    <p>Your feedback is valuable for improving this tool. Please report any issues or suggestions.</p>
+
+    <!-- Formspree Form -->
+    <form id="feedback-form" action="https://formspree.io/f/mjkedzbv" method="POST" class="feedback-form">
+        <div class="feedback-form-row">
+            <input type="text" name="name" id="feedback-name" placeholder="Your Name">
+            <input type="email" name="email" placeholder="Your JPS Email (Optional)">
+        </div>
+        <textarea name="message" id="feedback-text" placeholder="Describe the error, mistake, or improvement..." rows="4" required></textarea>
+        <div class="modal-buttons">
+            <button type="submit" class="confirm-btn">Submit</button>
+            <button type="button" onclick="toggleFeedback()" class="cancel-btn">Cancel</button>
+        </div>
+    </form>
+  </div>
+</div>
+
 
  <footer class="site-footer">
     <p>© 2025 BANH BAO</p>
@@ -449,6 +476,7 @@
          navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed'));
      }
  </script>
+
 </body>
 </html>
 
