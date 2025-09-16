@@ -148,6 +148,26 @@ document.addEventListener('DOMContentLoaded', () => {
     addEnterListener('phase2-current-rate', calculateDkaPhase2);
     addEnterListener('phase2-current-bg', calculateDkaPhase2);
     addEnterListener('gemini-input', handleGeminiChat);
+    
+    // --- MODAL KEYBOARD SHORTCUTS ---
+    window.addEventListener('keydown', (event) => {
+        const activeModal = document.querySelector('.modal.active');
+        if (activeModal) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const confirmButton = activeModal.querySelector('.confirm-btn');
+                if (confirmButton) {
+                    confirmButton.click();
+                }
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                const cancelButton = activeModal.querySelector('.cancel-btn');
+                if (cancelButton) {
+                    cancelButton.click();
+                }
+            }
+        }
+    });
 });
 
 // === ENHANCED FEATURES ===
@@ -281,10 +301,9 @@ function toggleFeedback() {
 
 function submitFeedback() {
     const form = document.getElementById('feedback-form');
-    const name = document.getElementById('feedback-name').value;
-    const feedback = document.getElementById('feedback-text').value;
+    const feedbackText = document.getElementById('feedback-text').value;
 
-    if (!feedback) {
+    if (!feedbackText) {
         alert('Please enter your feedback before submitting.');
         return;
     }
@@ -312,7 +331,8 @@ function submitFeedback() {
             })
         }
     }).catch(error => {
-        alert('Oops! There was a problem submitting your form');
+        alert('Oops! There was an error submitting your form.');
+        console.error('Formspree error:', error);
     });
 }
 document.getElementById('feedback-form').addEventListener('submit', function(e) {
