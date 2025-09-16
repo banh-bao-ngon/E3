@@ -36,7 +36,10 @@
 <div id="history-panel" class="history-panel">
     <div class="history-header">
         <h3>Calculation History</h3>
-        <button onclick="clearHistory()" class="clear-history-btn">Clear All</button>
+        <div>
+            <button onclick="clearHistory()" class="clear-history-btn" title="Clear All History">Clear All</button>
+            <button onclick="toggleHistory()" class="close-history-btn" title="Close Panel">&times;</button>
+        </div>
     </div>
     <div id="history-content" class="history-content">
         <p class="history-empty">No calculations yet</p>
@@ -212,7 +215,6 @@
                     <div id="dka-transition-content" class="dka-phase-content">
                         <div class="info-section">
                             <h3>Transition Phase</h3>
-                             <p class="section-subtitle">Calculate the reduced rate for BG ≤ 250 mg/dL.</p>
                              <p class="section-subtitle">GOAL BG: 150-200 mg/dL</p>
                              <div class="phase-gate">
                                 <i class="fas fa-arrow-down"></i>
@@ -450,10 +452,8 @@
 
     <!-- Formspree Form -->
     <form id="feedback-form" action="https://formspree.io/f/mjkedzbv" method="POST" class="feedback-form">
-        <div class="feedback-form-row">
-            <input type="text" name="name" id="feedback-name" placeholder="Your Name">
-            <input type="email" name="email" placeholder="Your JPS Email (Optional)">
-        </div>
+        <input type="text" name="name" id="feedback-name" placeholder="Your Name">
+        <input type="email" name="email" placeholder="Your JPS Email (Optional)">
         <textarea name="message" id="feedback-text" placeholder="Describe the error, mistake, or improvement..." rows="4" required></textarea>
         <div class="modal-buttons">
             <button type="submit" class="confirm-btn">Submit</button>
