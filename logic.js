@@ -271,6 +271,56 @@ function clearHistory() {
     }
 }
 
+// Feedback Modal
+function toggleFeedback() {
+    const modal = document.getElementById('feedback-modal');
+    if (modal) {
+        modal.classList.toggle('active');
+    }
+}
+
+function submitFeedback() {
+    const form = document.getElementById('feedback-form');
+    const name = document.getElementById('feedback-name').value;
+    const feedback = document.getElementById('feedback-text').value;
+
+    if (!feedback) {
+        alert('Please enter your feedback before submitting.');
+        return;
+    }
+
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Accept': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            alert('Thank you for your feedback!');
+            form.reset();
+            toggleFeedback();
+        } else {
+            response.json().then(data => {
+                if (Object.hasOwn(data, 'errors')) {
+                    alert(data["errors"].map(error => error["message"]).join(", "));
+                } else {
+                    alert('Oops! There was a problem submitting your form');
+                }
+            })
+        }
+    }).catch(error => {
+        alert('Oops! There was a problem submitting your form');
+    });
+}
+document.getElementById('feedback-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    submitFeedback();
+});
+
+
 // Confirmation modal for critical calculations
 function showConfirmation(message, values, callback) {
     pendingCalculation = callback;
@@ -283,7 +333,6 @@ function showConfirmation(message, values, callback) {
         valuesEl.innerHTML = values;
         modal.classList.add('active');
     } else {
-        // If modal doesn't exist, proceed with calculation
         callback();
     }
 }
@@ -348,7 +397,6 @@ function saveApiKey() {
             chatInterface.style.display = 'block';
         }
         
-        // Clear the input for security
         input.value = '';
     } else {
         alert('Please enter a valid API key');
@@ -382,7 +430,6 @@ function getHeparinInstructions() {
         return;
     }
 
-    // Check for critical values
     const isCritical = apttValue >= 200 || apttValue < 30;
     
     if (isCritical) {
@@ -455,11 +502,9 @@ function performHeparinCalculation(apttValue, resultsDiv) {
     `;
     resultsDiv.innerHTML = htmlOutput;
     
-    // Add enhancements
     addTimestamp(resultsDiv);
     addCompletionIndicator(resultsDiv);
     
-    // Add to history
     const isCritical = apttValue >= 200 || apttValue < 30;
     addToHistory(
         'Heparin Protocol',
@@ -482,7 +527,6 @@ function calculateInsulinRate() {
         return;
     }
 
-    // Check for critical BG
     if (bg > 600) {
         showConfirmation(
             'Blood glucose is critically high.',
@@ -556,7 +600,6 @@ function calculateInsulinAdjustment() {
         return;
     }
 
-    // Check for critical BG
     if (currentBg <= 70 || currentBg > 400) {
         showConfirmation(
             'Blood glucose is at a critical level.',
@@ -573,7 +616,6 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
     let newRateInfo = '';
     let resultClass = 'result-warning';
 
-    // Logic for BG <= 100 (does not require previous BG)
     if (currentBg <= 70) {
         resultClass = 'result-critical';
         if (isT1DM) {
@@ -589,11 +631,9 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
             adjustment = "<strong>Action:</strong> Hold insulin drip and recheck BG in 15 mins. If BG remains 71-140 mg/dL, check BG q30 mins x 2, then hourly. <br><strong>Resumption:</strong> Once BG ≥ 140 mg/dL, call physician to resume insulin at 50% previous rate and continue to follow the insulin protocol.";
         }
     } 
-    // Logic for BG > 100 (may require previous BG)
     else {
         const previousBg = parseInt(previousBgInput.value, 10);
         
-        // Rule for Current BG 101-140
         if (currentBg >= 101 && currentBg <= 140) {
             if (!isNaN(previousBg) && previousBg < 100) {
                 const newRate = Math.max(0, currentRate - 1);
@@ -609,14 +649,13 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
                 const newRate = Math.max(0, currentRate - change);
                 adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (70% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else { // Fallback rule for 101-140
+            } else { 
                 const change = Math.max(currentRate * 0.25, 0.5);
                 const newRate = Math.max(0, currentRate - change);
                 adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (25% or 0.5 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
             }
         } 
-        // Rule: Current BG 141-180
         else if (currentBg >= 141 && currentBg <= 180) {
             if (!isNaN(previousBg) && previousBg >= 201) {
                  const change = Math.max(currentRate * 0.50, 2);
@@ -630,7 +669,6 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
                  newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
             }
         } 
-        // Rule: Current BG 181-200
         else if (currentBg >= 181 && currentBg <= 200) {
             if (!isNaN(previousBg) && previousBg < 100) {
                 const newRate = currentRate + 1;
@@ -655,13 +693,12 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
                 const newRate = Math.max(0, currentRate - change);
                 adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (25% or 2 units/hr, whichever is greater).`;
                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else { // Fallback for 181-200 if previous BG does not match any ranges
+            } else {
                 const newRate = currentRate + 0.5;
                 adjustment = `<strong>Action:</strong> Increase rate by 0.5 units/hr.`;
                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
             }
         } 
-        // Rule: Current BG 201-250
         else if (currentBg >= 201 && currentBg <= 250) {
             if (!isNaN(previousBg) && previousBg <= 180) {
                 const change = Math.max(currentRate * 0.25, 2.0);
@@ -681,14 +718,13 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
                 adjustment = "<strong>Action:</strong> No change to current rate.";
                 newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
                 resultClass = 'result-therapeutic';
-            } else { // Fallback if previous BG is not entered
+            } else {
                  const change = Math.max(currentRate * 0.25, 1.0);
                  const newRate = Math.round((currentRate + change) * 10) / 10;
                  adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (Fallback).`;
                  newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
             }
         }
-        // Rule: Current BG 251-300
         else if (currentBg >= 251 && currentBg <= 300) {
              if (!isNaN(previousBg) && previousBg <= 140) {
                 const change = Math.max(currentRate * 0.25, 2.5);
@@ -721,15 +757,13 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
                 resultClass = 'result-therapeutic';
             }
         } 
-        // Rule: Current BG 301-400
         else if (currentBg >= 301 && currentBg <= 400) {
             const change = Math.max(currentRate * 0.40, 3.0);
             const newRate = currentRate + change;
             adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (40% or 3 units/hr, whichever is greater).`;
             newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
         } 
-        // Rule: Current BG > 400
-        else { // BG > 400
+        else { 
             const change = Math.max(currentRate * 0.50, 4.0);
             const newRate = currentRate + change;
             adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (50% or 4 units/hr, whichever is greater).`;
@@ -1022,3 +1056,4 @@ if(geminiSendBtn && geminiInput){
         }
     });
 }
+
