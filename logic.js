@@ -1,1079 +1,653 @@
-// Global variables for enhanced features
-let calculationHistory = [];
-let pendingCalculation = null;
-let apiKey = localStorage.getItem('gemini_api_key') || '';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clinical Protocols Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+</head>
+<body>
+<!-- Clinical Disclaimer Banner -->
+<div id="disclaimer-banner" class="disclaimer-banner">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>This tool is for clinical reference only. Always use clinical judgment and verify calculations independently.</span>
+    <button onclick="acceptDisclaimer()" class="accept-btn">I Understand</button>
+</div>
 
-// Initialize on DOM load
-document.addEventListener('DOMContentLoaded', () => {
-    // Check disclaimer acceptance
-    checkDisclaimer();
-    
-    // Load calculation history
-    loadHistory();
-    
-    // Initialize dark mode
-    initDarkMode();
-    
-    // Initialize API key UI
-    initApiKeyUI();
-    
-    // --- TAB NAVIGATION ---
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const protocolContents = document.querySelectorAll('.protocol-content');
+<!-- Dark Mode Toggle -->
+<button id="dark-mode-toggle" class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+    <i class="fas fa-moon"></i>
+</button>
 
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const protocol = button.dataset.protocol;
-            
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            protocolContents.forEach(content => content.classList.remove('active'));
+<!-- History Panel Toggle -->
+<button id="history-toggle" class="history-toggle" onclick="toggleHistory()" title="Calculation History">
+    <i class="fas fa-history"></i>
+    <span class="history-count" id="history-count">0</span>
+</button>
 
-            button.classList.add('active');
-            document.getElementById(`${protocol}-protocol-content`).classList.add('active');
-        });
-    });
+<!-- Feedback Button -->
+<button id="feedback-toggle" class="feedback-toggle" onclick="toggleFeedback()" title="Leave Feedback">
+    <i class="fas fa-comment-dots"></i>
+</button>
 
-    // --- INSULIN PROTOCOL DROPDOWN ---
-    const insulinSelect = document.getElementById('insulin-protocol-select');
-    const nonDkaProtocolDiv = document.getElementById('non-dka-hhs-protocol');
-    const dkaProtocolDiv = document.getElementById('dka-hhs-protocol');
-    const nonDkaSidebar = document.getElementById('non-dka-sidebar');
-    const dkaSidebar = document.getElementById('dka-sidebar');
+<!-- Monitoring Panel Toggle -->
+<button id="monitoring-toggle" class="monitoring-toggle" onclick="toggleMonitoringPanel()" title="Monitoring & Alerts">
+    <i class="fas fa-chart-line"></i>
+    <span class="flag-badge" id="flag-badge" style="display: none;"></span>
+</button>
 
-    if (insulinSelect) {
-        insulinSelect.addEventListener('change', () => {
-            const isDka = insulinSelect.value === 'dka-hhs';
-            nonDkaProtocolDiv.style.display = isDka ? 'none' : 'block';
-            dkaProtocolDiv.style.display = isDka ? 'block' : 'none';
-            nonDkaSidebar.style.display = isDka ? 'none' : 'block';
-            dkaSidebar.style.display = isDka ? 'block' : 'none';
-        });
-    }
-    
-    // --- DKA PHASE TABS ---
-    const dkaPhaseTabs = document.querySelector('.dka-phase-tabs');
-    if (dkaPhaseTabs) {
-        const dkaPhaseButtons = dkaPhaseTabs.querySelectorAll('.dka-phase-button');
-        const dkaPhaseContents = document.querySelectorAll('.dka-phase-content');
+<div id="history-panel" class="history-panel">
+    <div class="history-header">
+        <h3>Calculation History</h3>
+        <div>
+            <button onclick="clearHistory()" class="clear-history-btn" title="Clear All History">Clear All</button>
+            <button onclick="toggleHistory()" class="close-history-btn" title="Close Panel">&times;</button>
+        </div>
+    </div>
+    <div id="history-content" class="history-content">
+        <p class="history-empty">No calculations yet</p>
+    </div>
+</div>
 
-        dkaPhaseButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const phase = button.dataset.dkaPhase;
+<!-- Monitoring Panel -->
+<div id="monitoring-panel" class="monitoring-panel">
+    <div class="monitoring-header">
+        <h3>Clinical Monitoring</h3>
+        <button onclick="toggleMonitoringPanel()" class="close-monitoring-btn" title="Close Panel">&times;</button>
+    </div>
 
-                dkaPhaseButtons.forEach(btn => btn.classList.remove('active'));
-                dkaPhaseContents.forEach(content => content.classList.remove('active'));
+    <!-- Timer Section -->
+    <div class="monitoring-section">
+        <h4><i class="fas fa-clock"></i> Assessment Timer</h4>
+        <div class="timer-controls">
+            <div class="timer-display-container">
+                <div id="timer-display" class="timer-display">60:00</div>
+                <div id="target-time-display" class="target-time">Target: --:--:--</div>
+            </div>
+            <div class="timer-buttons">
+                <button id="timer-start-btn" onclick="startTimer()" class="timer-btn timer-start">Start</button>
+                <button id="timer-stop-btn" onclick="stopTimer()" class="timer-btn timer-stop" disabled>Stop</button>
+                <button id="timer-reset-btn" onclick="resetTimer()" class="timer-btn timer-reset">Reset</button>
+            </div>
+        </div>
+    </div>
 
-                button.classList.add('active');
-                document.getElementById(`dka-${phase}-content`).classList.add('active');
-            });
-        });
-    }
+    <!-- Monitoring Status -->
+    <div class="monitoring-section">
+        <h4><i class="fas fa-chart-bar"></i> Status</h4>
+        <div id="monitoring-status" class="monitoring-status">
+            <div class="status-item">
+                <span class="status-label">Total Readings:</span>
+                <span class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Active Flags:</span>
+                <span class="status-value">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Timer:</span>
+                <span class="status-value">Stopped</span>
+            </div>
+        </div>
+    </div>
 
-    // --- DYNAMIC VISIBILITY FOR PREVIOUS BG INPUT ---
-    const currentBgAdjInput = document.getElementById('current-bg-adj');
-    const previousBgRow = document.getElementById('previous-bg-row');
-    if (currentBgAdjInput && previousBgRow) {
-        currentBgAdjInput.addEventListener('input', () => {
-            const currentBg = parseInt(currentBgAdjInput.value, 10);
-            if (!isNaN(currentBg) && currentBg > 100) {
-                previousBgRow.style.display = 'grid';
-            } else {
-                previousBgRow.style.display = 'none';
-            }
-        });
-    }
-    
-    // --- WEIGHT CONVERTER LOGIC ---
-    function setupWeightConverter(lbsId, kgId) {
-        const lbsInput = document.getElementById(lbsId);
-        const kgInput = document.getElementById(kgId);
+    <!-- Tracking Graph -->
+    <div class="monitoring-section">
+        <h4><i class="fas fa-chart-line"></i> Tracking Data</h4>
+        <div class="graph-controls">
+            <select id="graph-type-select" onchange="updateGraph()">
+                <option value="bg">Blood Glucose</option>
+                <option value="rate">Infusion Rate</option>
+                <option value="both">Both</option>
+            </select>
+            <select id="graph-timeframe-select" onchange="updateGraph()">
+                <option value="6">Last 6 Hours</option>
+                <option value="12">Last 12 Hours</option>
+                <option value="24">Last 24 Hours</option>
+            </select>
+        </div>
+        <div class="graph-container">
+            <canvas id="tracking-chart" width="350" height="200"></canvas>
+        </div>
+    </div>
 
-        if (lbsInput && kgInput) {
-            lbsInput.addEventListener('input', () => {
-                const lbs = parseFloat(lbsInput.value);
-                if (!isNaN(lbs)) {
-                    kgInput.value = (lbs / 2.20462).toFixed(2);
-                } else {
-                    kgInput.value = '';
-                }
-            });
+    <!-- Active Flags -->
+    <div class="monitoring-section">
+        <h4><i class="fas fa-exclamation-triangle"></i> Active Alerts</h4>
+        <div id="flags-container" class="flags-container">
+            <p class="no-flags">No active alerts</p>
+        </div>
+    </div>
+</div>
 
-            kgInput.addEventListener('input', () => {
-                const kg = parseFloat(kgInput.value);
-                if (!isNaN(kg)) {
-                    lbsInput.value = (kg * 2.20462).toFixed(2);
-                } else {
-                    lbsInput.value = '';
-                }
-            });
-        }
-    }
-    setupWeightConverter('lbs-input', 'kg-input');
-    setupWeightConverter('other-lbs-input', 'other-kg-input');
+ <div class="main-wrapper">
+     <div class="tabs">
+         <button class="tab-button active" data-protocol="heparin">Heparin Protocol</button>
+         <button class="tab-button" data-protocol="insulin">Insulin Protocol</button>
+         <button class="tab-button" data-protocol="calculator">Calculator</button>
+         <button class="tab-button" data-protocol="gemini-ai">Dat AI Assistant</button>
+         <button class="tab-button" data-protocol="other">Other Protocols</button>
+     </div>
 
-    // --- DKA BOLUS CHECKBOX ---
-    const showBolusCheckbox = document.getElementById('show-bolus-calc');
-    const bolusCalculatorContent = document.getElementById('bolus-calculator-content');
-    if(showBolusCheckbox && bolusCalculatorContent) {
-        showBolusCheckbox.addEventListener('change', () => {
-            bolusCalculatorContent.style.display = showBolusCheckbox.checked ? 'block' : 'none';
-        });
-    }
+     <div class="tab-content">
+         <!-- Heparin Protocol Tab -->
+         <div id="heparin-protocol-content" class="protocol-content active">
+             <div class="container">
+                 <h1>Heparin Anticoagulation Protocol</h1>
+                 <div class="input-group">
+                     <label for="heparin-aptt">Enter aPTT value:</label>
+                     <input type="number" id="heparin-aptt" min="0" max="500" placeholder="e.g., 85">
+                     <button onclick="getHeparinInstructions()">Get Instructions</button>
+                     <a href="heparinQuickGuide-StandardVTE.pdf" download>Download Protocol PDF</a>
+                 </div>
+                 <div id="heparin-results" class="results-container">
+                 </div>
+             </div>
+             <div class="lab-monitoring-section">
+                 <h2>LAB MONITORING</h2>
+                 <div class="lab-monitoring-content">
+                     <div class="column">
+                         <h3>Activated Partial Thromboplastin Time (aPTT)</h3>
+                         <ul>
+                             <li>Draw STAT aPTT q6hrs after starting drip</li>
+                             <li>Round aPTT result to nearest whole number</li>
+                             <li>Adjust DOSE based on protocol chart</li>
+                         </ul>
+                         <h3>aPTT Timing</h3>
+                         <ul>
+                             <li><strong>Dose change:</strong> count 6 hours from time of dose adjustment.</li>
+                             <li><strong>No change:</strong> count 6 hours from aPTT result time.</li>
+                             <li>After 2 consecutive therapeutic aPTTs, switch to daily draws.</li>
+                             <li>If a daily aPTT is out of range, restart q6hr draws.</li>
+                         </ul>
+                         <h3>Discontinuing aPTTs</h3>
+                         <ul>
+                             <li>Discontinue aPTT draws once heparin is stopped.</li>
+                         </ul>
+                         <h3>CBC</h3>
+                         <ul>
+                             <li>Draw CBC with platelets the day after heparin start.</li>
+                             <li>Then, every 3 days minimum while on heparin.</li>
+                         </ul>
+                         <p class="warning">
+                             <i class="fas fa-exclamation-triangle"></i>
+                             If unable to draw labs or patient refuses, notify provider immediately.
+                         </p>
+                     </div>
+                 </div>
+             </div>
+         </div>
 
-    // --- EVENT LISTENERS FOR ENTER KEY ---
-    function addEnterListener(inputId, callback) {
-        const input = document.getElementById(inputId);
-        if (input) {
-            input.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    callback();
-                }
-            });
-        }
-    }
+         <!-- Insulin Protocol Tab -->
+         <div id="insulin-protocol-content" class="protocol-content">
+             <div class="container">
+                 <h1>Insulin Protocol</h1>
+                 <div class="input-group">
+                     <label for="insulin-protocol-select">Select Protocol:</label>
+                     <select id="insulin-protocol-select">
+                         <option value="non-dka-hhs">Non-DKA/HHS Insulin Drip</option>
+                         <option value="dka-hhs">DKA/HHS Insulin Drip</option>
+                     </select>
+                 </div>
 
-    // Add Enter key listeners to all inputs
-    addEnterListener('heparin-aptt', getHeparinInstructions);
-    addEnterListener('insulin-bg', calculateInsulinRate);
-    ['current-rate', 'previous-bg', 'current-bg-adj'].forEach(id => addEnterListener(id, calculateInsulinAdjustment));
-    addEnterListener('bolus-weight', calculateDkaBolus);
-    addEnterListener('lbs-input', calculateDkaBolus);
-    addEnterListener('kg-input', calculateDkaBolus);
-    addEnterListener('phase1-initiation-weight', calculateDkaInitiation);
-    addEnterListener('phase1-current-rate', calculateDkaPhase1Continuation);
-    addEnterListener('phase1-rate-change', calculateDkaPhase1Continuation);
-    addEnterListener('transition-weight', calculateDkaTransition);
-    addEnterListener('transition-current-rate', calculateDkaTransition);
-    addEnterListener('phase2-current-rate', calculateDkaPhase2);
-    addEnterListener('phase2-current-bg', calculateDkaPhase2);
-    addEnterListener('gemini-input', handleGeminiChat);
-    
-    // --- MODAL KEYBOARD SHORTCUTS ---
-    window.addEventListener('keydown', (event) => {
-        const activeModal = document.querySelector('.modal.active');
-        if (activeModal) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const confirmButton = activeModal.querySelector('.confirm-btn');
-                if (confirmButton) {
-                    confirmButton.click();
-                }
-            } else if (event.key === 'Escape') {
-                event.preventDefault();
-                const cancelButton = activeModal.querySelector('.cancel-btn');
-                if (cancelButton) {
-                    cancelButton.click();
-                }
-            }
-        }
-    });
-});
+                 <!-- NON-DKA/HHS PROTOCOL -->
+                 <div id="non-dka-hhs-protocol" style="display: block;">
+                      <div class="input-group">
+                         <a href="Insulin_Non-DKA_122020.pdf" download>Download Protocol PDF</a>
+                     </div>
+                     <h2>Goal Blood Glucose: 140-180 mg/dL</h2>
+                     <div class="info-section">
+                         <h3>Calculation of Initial Infusion Rate</h3>
+                         <div class="input-group">
+                             <label for="insulin-bg">Enter Current BG (mg/dL):</label>
+                             <input type="number" id="insulin-bg" min="0" max="1500" placeholder="e.g., 210">
+                             <button onclick="calculateInsulinRate()">Calculate Rate</button>
+                         </div>
+                         <div id="insulin-rate-results" class="results-container"></div>
+                     </div>
+                     <div class="info-section">
+                         <h3>Optional Initial Bolus</h3>
+                         <ul>
+                             <li>Administer initial bolus equal to starting rate of infusion (e.g., starting rate 3 units per hour, bolus= 3 units) <b>REQUIRES PHYSICIAN ORDER</b></li>
+                             <li>Do not administer an additional bolus if insulin infusion has already started (e.g., insulin infusion started in the Emergency Department prior to admission)</li>
+                         </ul>
+                     </div>
+                     <div class="info-section">
+                         <h3>Adjustment of Existing Infusion Rate</h3>
+                         <p class="section-subtitle"><strong>Remember hourly BG checks</strong>.</p>
+                         <div class="input-stack">
+                             <div class="input-row">
+                                 <label for="current-rate">Current Rate (units/hr):</label>
+                                 <input type="number" id="current-rate" min="0" max="100" step="0.1" placeholder="e.g., 3.5">
+                             </div>
+                             <div class="input-row" id="previous-bg-row" style="display: none;">
+                                 <label for="previous-bg">Previous BG (mg/dL):</label>
+                                 <input type="number" id="previous-bg" min="0" max="1500" placeholder="e.g., 250">
+                             </div>
+                             <div class="input-row">
+                                 <label for="current-bg-adj">Current BG (mg/dL):</label>
+                                 <input type="number" id="current-bg-adj" min="0" max="1500" placeholder="e.g., 210">
+                             </div>
+                             <div class="input-checkbox-row">
+                                <label for="type-1-dm">Type 1 DM:</label>
+                                <input type="checkbox" id="type-1-dm" class="align-checkbox">
+                            </div>
+                         </div>
+                         <div class="input-group">
+                              <button onclick="calculateInsulinAdjustment()">Calculate Adjustment</button>
+                         </div>
+                         <div id="insulin-adjustment-results" class="results-container"></div>
+                     </div>
+                 </div>
+                 
+                 <!-- DKA/HHS PROTOCOL (Initially Hidden) -->
+                 <div id="dka-hhs-protocol" style="display: none;">
+                    <div class="dka-phase-tabs">
+                        <button class="dka-phase-button active" data-dka-phase="phase1">Phase 1</button>
+                        <button class="dka-phase-button" data-dka-phase="transition">Transition Phase</button>
+                        <button class="dka-phase-button" data-dka-phase="phase2">Phase 2</button>
+                    </div>
+                    <div class="input-group">
+                        <a href="Insulin_DKA-HHS_032019.pdf" download>Download Protocol PDF</a>
+                    </div>
 
-// === ENHANCED FEATURES ===
+                    <div id="dka-phase1-content" class="dka-phase-content active">
+                        <div class="info-section">
+                            <h3>Phase 1: Initiation</h3>
+                            <p class="section-subtitle">Start infusion at 0.1 units/kg/hour.</p>
+                            <div class="input-stack">
+                                <div class="input-row">
+                                    <label for="phase1-initiation-weight">Patient Weight (kg):</label>
+                                    <input type="number" id="phase1-initiation-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <button onclick="calculateDkaInitiation()">Calculate Initial Rate</button>
+                            </div>
+                            <div id="phase1-initiation-results" class="results-container"></div>
+                        </div>
+                        <div class="info-section">
+                            <h3>Phase 1: Continuation (BG > 250)</h3>
+                            <p class="section-subtitle">Adjust hourly based on BG drop after the first hour.</p>
+                            <p class="section-subtitle">Proceed to Transition Phase when Blood Glucose is ≤ 250 mg/dL.</p>
+                            <div class="input-stack">
+                                <div class="input-row">
+                                    <label for="phase1-current-rate">Current Rate (units/hr):</label>
+                                    <input type="number" id="phase1-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0">
+                                </div>
+                                <div class="input-row">
+                                    <label for="phase1-rate-change">BG Drop (mg/dL/hr):</label>
+                                    <input type="number" id="phase1-rate-change" min="0" max="500" placeholder="e.g., 60">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <button onclick="calculateDkaPhase1Continuation()">Calculate Adjustment</button>
+                            </div>
+                            <div id="phase1-continuation-results" class="results-container"></div>
+                        </div>
+                    </div>
 
-// Disclaimer management
-function checkDisclaimer() {
-    const accepted = localStorage.getItem('disclaimer_accepted');
-    const banner = document.getElementById('disclaimer-banner');
-    if (banner && !accepted) {
-        banner.classList.remove('hidden');
-    } else if (banner) {
-        banner.classList.add('hidden');
-    }
-}
+                    <div id="dka-transition-content" class="dka-phase-content">
+                        <div class="info-section">
+                            <h3>Transition Phase</h3>
+                             <p class="section-subtitle">GOAL BG: 150-200 mg/dL</p>
+                             <div class="phase-gate">
+                                <i class="fas fa-arrow-down"></i>
+                                <p>Proceed to Transition Phase ONLY when Blood Glucose is <strong>≤ 250 mg/dL</strong>.</p>
+                                <p>DO NOT return to phase 1.</p>
+                                <p>With next BG, move to Phase 2.</p>
+                             </div>
+                             <div class="input-stack">
+                                <div class="input-row">
+                                    <label for="transition-weight">Patient Weight (kg):</label>
+                                    <input type="number" id="transition-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                                </div>
+                                <div class="input-row">
+                                    <label for="transition-current-rate">Current Rate (units/hr):</label>
+                                    <input type="number" id="transition-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <button onclick="calculateDkaTransition()">Calculate Transition</button>
+                            </div>
+                            <div id="transition-results" class="results-container"></div>
+                        </div>
+                    </div>
 
-function acceptDisclaimer() {
-    localStorage.setItem('disclaimer_accepted', 'true');
-    const banner = document.getElementById('disclaimer-banner');
-    if (banner) {
-        banner.classList.add('hidden');
-    }
-}
-
-// Dark mode
-function initDarkMode() {
-    const isDark = localStorage.getItem('dark_mode') === 'true';
-    if (isDark) {
-        document.body.classList.add('dark-mode');
-        updateDarkModeIcon();
-    }
-}
-
-function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('dark_mode', isDark);
-    updateDarkModeIcon();
-}
-
-function updateDarkModeIcon() {
-    const btn = document.getElementById('dark-mode-toggle');
-    if (btn) {
-        const icon = btn.querySelector('i');
-        if (document.body.classList.contains('dark-mode')) {
-            icon.className = 'fas fa-sun';
-        } else {
-            icon.className = 'fas fa-moon';
-        }
-    }
-}
-
-// History management
-function loadHistory() {
-    const saved = localStorage.getItem('calculation_history');
-    if (saved) {
-        calculationHistory = JSON.parse(saved);
-        updateHistoryDisplay();
-    }
-}
-
-function saveHistory() {
-    localStorage.setItem('calculation_history', JSON.stringify(calculationHistory));
-    updateHistoryDisplay();
-}
-
-function addToHistory(protocol, inputs, result, isCritical = false) {
-    const entry = {
-        id: Date.now(),
-        timestamp: new Date().toLocaleString(),
-        protocol,
-        inputs,
-        result,
-        isCritical
-    };
-    
-    calculationHistory.unshift(entry);
-    if (calculationHistory.length > 50) {
-        calculationHistory = calculationHistory.slice(0, 50);
-    }
-    
-    saveHistory();
-}
-
-function updateHistoryDisplay() {
-    const content = document.getElementById('history-content');
-    const count = document.getElementById('history-count');
-    
-    if (count) {
-        count.textContent = calculationHistory.length;
-    }
-    
-    if (content) {
-        if (calculationHistory.length === 0) {
-            content.innerHTML = '<p class="history-empty">No calculations yet</p>';
-        } else {
-            content.innerHTML = calculationHistory.map(entry => `
-                <div class="history-item ${entry.isCritical ? 'critical' : ''}">
-                    <div class="history-timestamp">${entry.timestamp}</div>
-                    <div class="history-protocol">${entry.protocol}</div>
-                    <div class="history-details">
-                        <strong>Input:</strong> ${entry.inputs}<br>
-                        <strong>Result:</strong> ${entry.result}
+                    <div id="dka-phase2-content" class="dka-phase-content">
+                        <div class="info-section">
+                            <h3>Phase 2: Titration</h3>
+                            <p class="section-subtitle">Goal BG is 150-200 mg/dL.</p>
+                             <div class="input-stack">
+                                <div class="input-row">
+                                    <label for="phase2-current-rate">Current Rate (units/hr):</label>
+                                    <input type="number" id="phase2-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 3.5">
+                                </div>
+                                <div class="input-row">
+                                    <label for="phase2-current-bg">Current BG (mg/dL):</label>
+                                    <input type="number" id="phase2-current-bg" min="0" max="1500" placeholder="e.g., 180">
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <button onclick="calculateDkaPhase2()">Calculate Phase 2</button>
+                            </div>
+                            <div id="phase2-results" class="results-container"></div>
+                        </div>
+                    </div>
+                 </div>
+             </div>
+             <!-- Sidebars for Insulin Protocols -->
+             <div id="non-dka-sidebar" style="display: block;">
+                 <div class="lab-monitoring-section">
+                     <h2>Key Points</h2>
+                     <div class="lab-monitoring-content">
+                         <div class="column">
+                             <h3>Monitoring</h3>
+                             <ul>
+                                 <li>Check blood glucose <strong>hourly</strong>.</li>
+                                 <li>If stable in target range (140-180mg/dL) for 4 hrs, decrease to <strong>every 2 hours</strong> BG checks.</li>
+                                 <li>Check BMP at baseline and <strong>every 4 hours</strong> during infusion.</li>
+                             </ul>
+                             <h3>Safety & Prerequisites</h3>
+                             <ul>
+                                 <li class="critical-warning">Do NOT start infusion if potassium is <strong>&lt; 3.3 mEq/L</strong>.</li>
+                                 <li>Investigate any unexplained hypo or hyperglycemia.</li>
+                             </ul>
+                             <h3>Adjustments & Special Situations</h3>
+                             <ul>
+                                 <li>Adjust insulin for any changes in glucose source (diet, TPN, etc.).</li>
+                                 <li>If a glucose source is held, <strong>reduce insulin rate by 50%</strong> and perform hourly BG checks.</li>
+                                 <li>If transport, <strong>titrate/protocol + hourly BG checks</strong> or <strong>turn infusion OFF</strong> if monitoring isn't possible and resume protocol when return to.</li>
+                                 <li>Ensure an alternative glycemic plan is ordered before discontinuing the infusion.</li>
+                             </ul>
+                             <h3>Discontinuing Infusion</h3>
+                             <ul>
+                                 <li>Consider switching to subcutaneous insulin when BG is stable (100-180 mg/dL) for 6+ hours.</li>
+                                 <li><strong>Overlap:</strong> Administer subcutaneous insulin 1-2 hours <strong>before</strong> stopping the infusion.</li>
+                                 <li><strong>NPO Patients:</strong> Give 80% of the 24hr infusion total as a long-acting basal dose.</li>
+                                 <li><strong>PO Intake:</strong> Give 50% of the 24hr infusion total as a basal dose and start mealtime insulin.</li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+             <div id="dka-sidebar" style="display: none;">
+                 <div class="lab-monitoring-section">
+                    <h2>Key Points: DKA/HHS</h2>
+                    <div class="lab-monitoring-content">
+                        <div class="column">
+                            <h3>Safety & Prerequisites</h3>
+                            <ul>
+                                <li class="critical-warning">Do not start insulin until K+ is > 3.3 mEq/L.</li>
+                                <li>Use only Blue Low Sorbing infusion set (prime with 20mL).</li>
+                                <li>Change tubing q24hr with new solution bag.</li>
+                                <li class="critical-warning">Avoid transitioning off infusion overnight.</li>
+                            </ul>
+                            <h3>Monitoring & Labs</h3>
+                            <ul>
+                                <li>Check blood glucose <strong>hourly</strong>.</li>
+                                <li>Draw labs STAT q2h until K+ is stable (4.0-5.0) for 4h, then q4h.</li>
+                                <li>Check BG at discontinuation and 2 hours post-discontinuation.</li>
+                            </ul>
+                             <h3>Rate Adjustments & Special Situations</h3>
+                             <ul>
+                                <li>Notify provider if rate is > 20 units/hr or < 2.0 units/hr for 4 hours.</li>
+                                <li>When BG < 150 mg/dL: increase D5½NS to 150 mL/hr and check BG in 1 hour. Call MD if still < 150.</li>
+                             </ul>
+                            <h3>Discontinuing Infusion</h3>
+                            <ul>
+                                <li>Call physician when anion gap < 12 for 4 hours (2 chemistries) to consider transition.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            `).join('');
-        }
-    }
-}
+                 <div class="lab-monitoring-section" style="margin-top: 2rem;">
+                     <h3>Bolus (if ordered)</h3>
+                     <div class="input-checkbox-row" style="justify-content: center; margin-bottom: 1rem;">
+                         <label for="show-bolus-calc">Calculate Bolus?</label>
+                         <input type="checkbox" id="show-bolus-calc" class="align-checkbox">
+                     </div>
+                     <div id="bolus-calculator-content" style="display: none;">
+                         <p class="section-subtitle">Calculates Regular insulin at 0.1 units/kg (Max 10 units) and includes a weight converter.</p>
+                         <div class="input-stack">
+                             <div class="input-row">
+                                 <label for="lbs-input">Pounds (lbs):</label>
+                                 <input type="number" id="lbs-input" placeholder="e.g., 154">
+                             </div>
+                             <div class="input-row">
+                                 <label for="kg-input">Kilograms (kg):</label>
+                                 <input type="number" id="kg-input" placeholder="e.g., 70">
+                             </div>
+                             <hr>
+                             <div class="input-row">
+                                 <label for="bolus-weight">Patient Weight (kg):</label>
+                                 <input type="number" id="bolus-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                             </div>
+                         </div>
+                         <div class="input-group">
+                             <button onclick="calculateDkaBolus()">Calculate Bolus</button>
+                         </div>
+                         <div id="bolus-results" class="results-container"></div>
+                    </div>
+                 </div>
+             </div>
+         </div>
 
-function toggleHistory() {
-    const panel = document.getElementById('history-panel');
-    if (panel) {
-        panel.classList.toggle('active');
-    }
-}
+         <!-- Calculator Tab -->
+         <div id="calculator-protocol-content" class="protocol-content">
+             <div class="container">
+                 <h1>Calculator Tools</h1>
 
-function clearHistory() {
-    if (confirm('Are you sure you want to clear all calculation history?')) {
-        calculationHistory = [];
-        saveHistory();
-    }
-}
+                 <div class="calculator-sections">
+                     <!-- Weight Converter Section -->
+                     <div class="calc-section">
+                         <h2><i class="fas fa-weight-hanging"></i> Weight Converter</h2>
+                         <div class="weight-converter">
+                             <div class="input-group">
+                                 <label for="calc-lbs-input">Pounds (lbs):</label>
+                                 <input type="number" id="calc-lbs-input" placeholder="Enter weight in pounds" step="0.1">
+                             </div>
+                             <div class="conversion-arrow">
+                                 <i class="fas fa-exchange-alt"></i>
+                             </div>
+                             <div class="input-group">
+                                 <label for="calc-kg-input">Kilograms (kg):</label>
+                                 <input type="number" id="calc-kg-input" placeholder="Enter weight in kilograms" step="0.1">
+                             </div>
+                         </div>
+                     </div>
 
-// Feedback Modal
-function toggleFeedback() {
-    const modal = document.getElementById('feedback-modal');
-    if (modal) {
-        modal.classList.toggle('active');
-    }
-}
+                     <!-- Basic Math Calculator Section -->
+                     <div class="calc-section">
+                         <h2><i class="fas fa-calculator"></i> Basic Calculator</h2>
+                         <div class="basic-calculator">
+                             <div class="calc-display">
+                                 <input type="text" id="calc-display" readonly placeholder="0">
+                             </div>
+                             <div class="calc-buttons">
+                                 <button class="calc-btn calc-clear" onclick="clearCalculator()">C</button>
+                                 <button class="calc-btn calc-clear" onclick="clearEntry()">CE</button>
+                                 <button class="calc-btn calc-operator" onclick="appendToDisplay('/')" title="Divide">÷</button>
+                                 <button class="calc-btn calc-operator" onclick="appendToDisplay('*')" title="Multiply">×</button>
 
-function submitFeedback() {
-    const form = document.getElementById('feedback-form');
-    const feedbackText = document.getElementById('feedback-text').value;
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('7')">7</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('8')">8</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('9')">9</button>
+                                 <button class="calc-btn calc-operator" onclick="appendToDisplay('-')" title="Subtract">-</button>
 
-    if (!feedbackText) {
-        alert('Please enter your feedback before submitting.');
-        return;
-    }
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('4')">4</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('5')">5</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('6')">6</button>
+                                 <button class="calc-btn calc-operator" onclick="appendToDisplay('+')" title="Add">+</button>
 
-    const formData = new FormData(form);
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('1')">1</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('2')">2</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('3')">3</button>
+                                 <button class="calc-btn calc-equals" onclick="calculateResult()" rowspan="2" title="Equals">=</button>
 
-    fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'Accept': 'application/json'
-        }
-    }).then(response => {
-        if (response.ok) {
-            alert('Thank you for your feedback!');
-            form.reset();
-            toggleFeedback();
-        } else {
-            response.json().then(data => {
-                if (Object.hasOwn(data, 'errors')) {
-                    alert(data["errors"].map(error => error["message"]).join(", "));
-                } else {
-                    alert('Oops! There was a problem submitting your form');
-                }
-            })
-        }
-    }).catch(error => {
-        alert('Oops! There was an error submitting your form.');
-        console.error('Formspree error:', error);
-    });
-}
-document.getElementById('feedback-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    submitFeedback();
-});
+                                 <button class="calc-btn calc-number calc-zero" onclick="appendToDisplay('0')">0</button>
+                                 <button class="calc-btn calc-number" onclick="appendToDisplay('.')">.</button>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
 
+         <!-- AI Assistant Tab -->
+        <div id="gemini-ai-protocol-content" class="protocol-content">
+            <div class="container">
+                <h1>Dat AI Clinical Assistant</h1>
+                <div class="ai-disclaimer">
+                    <i class="fas fa-info-circle"></i>
+                    <p><strong>Important:</strong> This AI assistant is for supplementary information only. It does not replace clinical judgment or professional medical advice. Always verify information independently.</p>
+                </div>
+                
+                <!-- API Key Setup -->
+                <div id="api-key-setup" class="api-key-setup">
+                    <h3>Setup AI Assistant</h3>
+                    <p>Enter your API key to enable the AI assistant:</p>
+                    <div class="api-key-input-group">
+                        <input type="password" id="api-key-input" placeholder="Enter your Gemini API key">
+                        <button onclick="saveApiKey()">Save Key</button>
+                    </div>
+                    <p class="api-key-help">
+                        <a href="https://makersuite.google.com/app/apikey" target="_blank">Get your API key from Google AI Studio</a>
+                    </p>
+                </div>
 
-// Confirmation modal for critical calculations
-function showConfirmation(message, values, callback) {
-    pendingCalculation = callback;
-    const modal = document.getElementById('confirmation-modal');
-    const messageEl = document.getElementById('confirmation-message');
-    const valuesEl = document.getElementById('modal-values');
-    
-    if (modal && messageEl && valuesEl) {
-        messageEl.textContent = message;
-        valuesEl.innerHTML = values;
-        modal.classList.add('active');
-    } else {
-        callback();
-    }
-}
-
-function confirmCalculation() {
-    const modal = document.getElementById('confirmation-modal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
-    if (pendingCalculation) {
-        pendingCalculation();
-        pendingCalculation = null;
-    }
-}
-
-function cancelCalculation() {
-    const modal = document.getElementById('confirmation-modal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
-    pendingCalculation = null;
-}
-
-// Add timestamp to results
-function addTimestamp(resultsDiv) {
-    const timestamp = document.createElement('div');
-    timestamp.className = 'calculation-timestamp';
-    timestamp.textContent = `Calculated at ${new Date().toLocaleTimeString()}`;
-    resultsDiv.appendChild(timestamp);
-}
-
-// Add completion indicator
-function addCompletionIndicator(resultsDiv) {
-    const indicator = document.createElement('div');
-    indicator.className = 'completion-indicator';
-    indicator.innerHTML = '<i class="fas fa-check-circle"></i> Calculation Complete';
-    resultsDiv.appendChild(indicator);
-}
-
-// API Key management
-function initApiKeyUI() {
-    const setup = document.getElementById('api-key-setup');
-    const chatInterface = document.getElementById('chat-interface');
-    
-    if (apiKey && setup && chatInterface) {
-        setup.style.display = 'none';
-        chatInterface.style.display = 'block';
-    }
-}
-
-function saveApiKey() {
-    const input = document.getElementById('api-key-input');
-    if (input && input.value) {
-        apiKey = input.value;
-        localStorage.setItem('gemini_api_key', apiKey);
-        
-        const setup = document.getElementById('api-key-setup');
-        const chatInterface = document.getElementById('chat-interface');
-        
-        if (setup && chatInterface) {
-            setup.style.display = 'none';
-            chatInterface.style.display = 'block';
-        }
-        
-        input.value = '';
-    } else {
-        alert('Please enter a valid API key');
-    }
-}
-
-function changeApiKey() {
-    const setup = document.getElementById('api-key-setup');
-    const chatInterface = document.getElementById('chat-interface');
-    
-    if (setup && chatInterface) {
-        setup.style.display = 'block';
-        chatInterface.style.display = 'none';
-    }
-}
-
-// === ORIGINAL CLINICAL CALCULATIONS (PRESERVED EXACTLY) ===
-
-/**
- * Calculates and displays heparin dose adjustments.
- */
-function getHeparinInstructions() {
-    const apttInput = document.getElementById('heparin-aptt');
-    const apttValue = parseFloat(apttInput.value);
-    const resultsDiv = document.getElementById('heparin-results');
-
-    resultsDiv.innerHTML = '';
-
-    if (isNaN(apttValue) || apttValue < 0) {
-        resultsDiv.innerHTML = '<p class="result-error">Please enter a valid aPTT value.</p>';
-        return;
-    }
-
-    const isCritical = apttValue >= 200 || apttValue < 30;
-    
-    if (isCritical) {
-        showConfirmation(
-            'This is a critical aPTT value requiring immediate attention.',
-            `aPTT Value: ${apttValue} seconds`,
-            () => performHeparinCalculation(apttValue, resultsDiv)
-        );
-    } else {
-        performHeparinCalculation(apttValue, resultsDiv);
-    }
-}
-
-function performHeparinCalculation(apttValue, resultsDiv) {
-    let bolus = 'None';
-    let holdInfusion = 'No';
-    let doseChange = '';
-    let nextAptt = '6 hrs';
-    let highlightClass = 'result-warning'; 
-
-    if (apttValue < 30) {
-        bolus = '80 units/kg';
-        doseChange = 'Increase by 4 units/kg/hr';
-    } else if (apttValue >= 30 && apttValue <= 50) {
-        bolus = '40 units/kg';
-        doseChange = 'Increase by 3 units/kg/hr';
-    } else if (apttValue >= 51 && apttValue <= 69) {
-        doseChange = 'Increase by 2 units/kg/hr';
-    } else if (apttValue >= 70 && apttValue <= 90) {
-        doseChange = 'No Dose Change';
-        nextAptt = '6 hrs or next morning';
-        highlightClass = 'result-therapeutic'; 
-    } else if (apttValue >= 91 && apttValue <= 100) {
-        doseChange = 'Decrease by 1 unit/kg/hr';
-    } else if (apttValue >= 101 && apttValue <= 110) {
-        holdInfusion = '30 min';
-        doseChange = 'Decrease by 2 units/kg/hr';
-    } else if (apttValue >= 111 && apttValue <= 120) {
-        holdInfusion = '1 hr';
-        doseChange = 'Decrease by 3 units/kg/hr';
-    } else if (apttValue >= 121 && apttValue <= 199) {
-        holdInfusion = '2 hrs';
-        doseChange = 'Decrease by 3 units/kg/hr';
-    } else { // apttValue >= 200
-        holdInfusion = 'Hold & PAGE MD, check aPTT q2h until < 121';
-        doseChange = 'PAGE MD, DECREASE by 4 units/kg/hr and restart when aPTT < 121';
-        nextAptt = '6 hrs after aPTT < 121';
-        highlightClass = 'result-critical'; 
-    }
-
-    const htmlOutput = `
-        <div class="result-grid">
-            <div class="result-item">
-                <h3>Bolus:</h3>
-                <p>${bolus}</p>
-            </div>
-            <div class="result-item ${highlightClass === 'result-critical' ? 'result-critical' : ''}">
-                <h3>Hold Infusion:</h3>
-                <p>${holdInfusion}</p>
-            </div>
-            <div class="result-item ${highlightClass === 'result-therapeutic' || highlightClass === 'result-critical' ? highlightClass : ''}">
-                <h3>Dose Change:</h3>
-                <p>${doseChange}</p>
-            </div>
-            <div class="result-item">
-                <h3>Next aPTT:</h3>
-                <p>${nextAptt}</p>
+                <div id="chat-interface" class="chat-interface" style="display: none;">
+                    <div class="chat-container">
+                        <div class="chat-box" id="gemini-chat-box">
+                            <div class="chat-message bot-message">
+                                <p>Hello! I'm an AI assistant for clinical information. Remember, I'm supplementary only - always use your clinical judgment and verify any information independently.</p>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="gemini-input" placeholder="Ask a clinical question...">
+                            <button id="gemini-send-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                        <button onclick="changeApiKey()" class="change-key-btn">Change API Key</button>
+                    </div>
+                </div>
             </div>
         </div>
-    `;
-    resultsDiv.innerHTML = htmlOutput;
-    
-    addTimestamp(resultsDiv);
-    addCompletionIndicator(resultsDiv);
-    
-    const isCritical = apttValue >= 200 || apttValue < 30;
-    addToHistory(
-        'Heparin Protocol',
-        `aPTT: ${apttValue}`,
-        `${doseChange}, Hold: ${holdInfusion}`,
-        isCritical
-    );
-}
 
-/**
- * Calculates the initial insulin infusion rate for Non-DKA.
- */
-function calculateInsulinRate() {
-    const bgInput = document.getElementById('insulin-bg');
-    const resultsDiv = document.getElementById('insulin-rate-results');
-    const bg = parseInt(bgInput.value, 10);
+         <!-- Other Protocols Tab -->
+         <div id="other-protocol-content" class="protocol-content">
+             <div class="container">
+                 <h1>Other Protocols</h1>
 
-    if (isNaN(bg) || bg <= 0) {
-        resultsDiv.innerHTML = `<p class="result-error">Please enter a valid Blood Glucose (BG) value.</p>`;
-        return;
-    }
+                 <div class="coming-soon-section">
+                     <div class="coming-soon-content">
+                         <i class="fas fa-clock fa-3x"></i>
+                         <h2>Additional Protocols Coming Soon</h2>
+                         <p>This section will be updated with additional clinical protocols and tools to support healthcare providers.</p>
 
-    if (bg > 600) {
-        showConfirmation(
-            'Blood glucose is critically high.',
-            `Blood Glucose: ${bg} mg/dL`,
-            () => performInsulinRateCalculation(bg, resultsDiv)
-        );
-    } else {
-        performInsulinRateCalculation(bg, resultsDiv);
-    }
-}
+                         <div class="planned-features">
+                             <h3>Planned Features:</h3>
+                             <ul>
+                                 <li><i class="fas fa-heart"></i> Cardiac Protocols</li>
+                                 <li><i class="fas fa-lungs"></i> Respiratory Protocols</li>
+                                 <li><i class="fas fa-prescription-bottle-alt"></i> Medication Dosing Guidelines</li>
+                                 <li><i class="fas fa-chart-pie"></i> Laboratory Reference Ranges</li>
+                                 <li><i class="fas fa-file-medical"></i> Emergency Protocols</li>
+                             </ul>
+                         </div>
 
-function performInsulinRateCalculation(bg, resultsDiv) {
-    let rateMessage = '';
-    let resultClass = 'result-info';
+                         <div class="update-notice">
+                             <p><strong>Note:</strong> Content updates will be implemented based on clinical needs and user feedback.</p>
+                         </div>
+                     </div>
+                 </div>
 
-    const calculatedRate = (bg - 60) * 0.02;
-    
-    if (calculatedRate < 0) {
-         rateMessage = `BG is below the threshold for calculation. Consult provider.`;
-         resultClass = 'result-warning';
-    } else {
-        rateMessage = `Calculated initial infusion rate: <strong>${calculatedRate.toFixed(1)} units/hr</strong>.`;
-        if (bg > 600) {
-            rateMessage += `<br><br><strong style="color: #c0392b;">Warning: BG > 600 mg/dL. Starting rate REQUIRES PHYSICIAN ORDER.</strong>`;
-            resultClass = 'result-critical';
-        }
-    }
+                 <!-- Quick Reference Section -->
+                 <div class="info-section">
+                     <h3><i class="fas fa-info-circle"></i> Quick Clinical References</h3>
+                     <div class="reference-grid">
+                         <div class="reference-card">
+                             <h4>Heparin Therapy</h4>
+                             <ul>
+                                 <li>Normal aPTT: 25-35 seconds</li>
+                                 <li>Therapeutic aPTT: 70-90 seconds</li>
+                                 <li>Critical aPTT: >100 seconds</li>
+                             </ul>
+                         </div>
+                         <div class="reference-card">
+                             <h4>Blood Glucose</h4>
+                             <ul>
+                                 <li>Normal (fasting): 70-100 mg/dL</li>
+                                 <li>Non-DKA Target: 140-180 mg/dL</li>
+                                 <li>DKA Phase 2 Target: 150-200 mg/dL</li>
+                             </ul>
+                         </div>
+                         <div class="reference-card">
+                             <h4>Insulin Protocols</h4>
+                             <ul>
+                                 <li>Hypoglycemia: BG < 70 mg/dL</li>
+                                 <li>Critical High: BG > 600 mg/dL</li>
+                                 <li>Maximum Rate: 20 units/hr (notify provider)</li>
+                             </ul>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+         
+     </div> <!-- This closes .tab-content -->
+ </div> <!-- This closes .main-wrapper -->
 
-    const cautionsHtml = `
-        <div class="result-item result-critical" style="text-align: left; margin-top: 1rem;">
-            <h4 style="color: black; margin-top: 0; margin-bottom: 0.5rem;">Cautions:</h4>
-            <ul style="padding-left: 20px; margin: 0; color: black; list-style-position: inside;">
-                <li>Caution with elderly, CKD and low body weight individuals.</li>
-                <li>Caution with BG > 600 mg/dL (starting dose may be too high).</li>
-                <li>Notify provider if insulin infusion rate is > 20 units/hour.</li>
-            </ul>
+ <!-- Confirmation Modal -->
+ <div id="confirmation-modal" class="modal">
+     <div class="modal-content">
+         <h3 class="critical-header"><i class="fas fa-exclamation-triangle"></i> Confirm Critical Calculation</h3>
+         <p id="confirmation-message"></p>
+         <div class="modal-values" id="modal-values"></div>
+         <p class="modal-warning">Please verify these values before proceeding. This calculation will be logged.</p>
+         <div class="modal-buttons">
+             <button onclick="confirmCalculation()" class="confirm-btn">Confirm & Calculate</button>
+             <button onclick="cancelCalculation()" class="cancel-btn">Cancel</button>
+         </div>
+     </div>
+ </div>
+
+ <!-- Feedback Modal -->
+<div id="feedback-modal" class="modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-comment-dots"></i> Provide Feedback</h3>
+    <p>Your feedback is valuable for improving this tool. Please report any issues or suggestions.</p>
+
+    <!-- Formspree Form -->
+    <form id="feedback-form" action="https://formspree.io/f/mjkedzbv" method="POST" class="feedback-form">
+        <input type="text" name="name" id="feedback-name" placeholder="Your Name">
+        <input type="email" name="email" placeholder="Your JPS Email (Optional)">
+        <textarea name="message" id="feedback-text" placeholder="Describe the error, mistake, or improvement..." rows="4" required></textarea>
+        <div class="modal-buttons">
+            <button type="submit" class="confirm-btn">Submit</button>
+            <button type="button" onclick="toggleFeedback()" class="cancel-btn">Cancel</button>
         </div>
-    `;
-   
-    resultsDiv.innerHTML = `<p class="${resultClass}" style="padding: 15px; border-radius: 5px; border-left-width: 5px; border-left-style: solid;">${rateMessage}</p>` + cautionsHtml;
-    
-    addTimestamp(resultsDiv);
-    addCompletionIndicator(resultsDiv);
-    
-    addToHistory(
-        'Non-DKA Insulin Initial Rate',
-        `BG: ${bg} mg/dL`,
-        `Rate: ${calculatedRate.toFixed(1)} units/hr`,
-        bg > 600
-    );
-}
+    </form>
+  </div>
+</div>
 
-/**
- * Calculates adjustments for an existing Non-DKA insulin infusion.
- */
-function calculateInsulinAdjustment() {
-    const currentRateInput = document.getElementById('current-rate');
-    const currentBgInput = document.getElementById('current-bg-adj');
-    const previousBgInput = document.getElementById('previous-bg');
-    const isT1DMInput = document.getElementById('type-1-dm');
-    const resultsDiv = document.getElementById('insulin-adjustment-results');
 
-    const currentRate = parseFloat(currentRateInput.value);
-    const currentBg = parseInt(currentBgInput.value, 10);
-    const isT1DM = isT1DMInput.checked;
+ <footer class="site-footer">
+    <p>© 2025 BANH BAO</p>
+    <p>Developed, tested, and oversaw by Banh Bao</p>
+</footer>
 
-    resultsDiv.innerHTML = '';
+ <script src="logic.js"></script>
+ <script>
+     // Register Service Worker for offline capability
+     if ('serviceWorker' in navigator) {
+         navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed'));
+     }
+ </script>
 
-    if (isNaN(currentRate) || isNaN(currentBg) || currentRate < 0 || currentBg <= 0) {
-        resultsDiv.innerHTML = `<p class="result-error">Please enter valid values for Current Rate and Current BG.</p>`;
-        return;
-    }
-
-    if (currentBg <= 70 || currentBg > 400) {
-        showConfirmation(
-            'Blood glucose is at a critical level.',
-            `Current BG: ${currentBg} mg/dL<br>Current Rate: ${currentRate} units/hr`,
-            () => performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgInput, isT1DM, resultsDiv)
-        );
-    } else {
-        performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgInput, isT1DM, resultsDiv);
-    }
-}
-
-function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgInput, isT1DM, resultsDiv) {
-    let adjustment = '';
-    let newRateInfo = '';
-    let resultClass = 'result-warning';
-
-    if (currentBg <= 70) {
-        resultClass = 'result-critical';
-        if (isT1DM) {
-            adjustment = "<strong>Action:</strong> Hold insulin drip and initiate hypoglycemia SDO. If BG remains < 140 mg/dL after treatment, start D5W at 50 cc/hr and monitor BG hourly. <br><strong>Resumption:</strong> Once BG ≥ 140 mg/dL, call physician to resume insulin at 50% previous rate and continue to follow the insulin protocol. Stop D5W one hour after insulin is resumed if BG ≥ 140 mg/dL.";
-        } else {
-            adjustment = "<strong>Action:</strong> Hold insulin drip and initiate hypoglycemia SDO. If BG remains < 140 mg/dL after treatment, check BG hourly until BG ≥ 140 mg/dL. <br><strong>Resumption:</strong> Once BG ≥ 140 mg/dL, call physician to resume insulin at 50% previous rate and continue to follow the insulin protocol.";
-        }
-    } else if (currentBg >= 71 && currentBg <= 100) {
-        resultClass = 'result-critical';
-        if (isT1DM) {
-            adjustment = "<strong>Action:</strong> Hold insulin drip and recheck BG in 15 mins. If BG remains 71-140 mg/dL, start D5W at 50 cc/hr and check BG q30 mins x 2, then hourly. <br><strong>Resumption:</strong> Once BG ≥ 140 mg/dL, call physician to resume insulin at 50% previous rate and continue to follow the insulin protocol. Stop D5W one hour after insulin is resumed if BG ≥ 140 mg/dL.";
-        } else {
-            adjustment = "<strong>Action:</strong> Hold insulin drip and recheck BG in 15 mins. If BG remains 71-140 mg/dL, check BG q30 mins x 2, then hourly. <br><strong>Resumption:</strong> Once BG ≥ 140 mg/dL, call physician to resume insulin at 50% previous rate and continue to follow the insulin protocol.";
-        }
-    } 
-    else {
-        const previousBg = parseInt(previousBgInput.value, 10);
-        
-        if (currentBg >= 101 && currentBg <= 140) {
-            if (!isNaN(previousBg) && previousBg < 100) {
-                const newRate = Math.max(0, currentRate - 1);
-                adjustment = `<strong>Action:</strong> Decrease rate by 1 unit/hr. <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 141 && previousBg <= 300) {
-                const change = Math.max(currentRate * 0.50, 2);
-                const newRate = Math.max(0, currentRate - change);
-                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (50% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg > 300) {
-                const change = Math.max(currentRate * 0.70, 2);
-                const newRate = Math.max(0, currentRate - change);
-                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (70% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else { 
-                const change = Math.max(currentRate * 0.25, 0.5);
-                const newRate = Math.max(0, currentRate - change);
-                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (25% or 0.5 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            }
-        } 
-        else if (currentBg >= 141 && currentBg <= 180) {
-            if (!isNaN(previousBg) && previousBg >= 201) {
-                 const change = Math.max(currentRate * 0.50, 2);
-                 const newRate = Math.max(0, currentRate - change);
-                 adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (50% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Continue hourly BG checks.`;
-                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-                 resultClass = 'result-warning';
-            } else {
-                 resultClass = 'result-therapeutic';
-                 adjustment = "<strong>Action:</strong> No change in rate.";
-                 newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
-            }
-        } 
-        else if (currentBg >= 181 && currentBg <= 200) {
-            if (!isNaN(previousBg) && previousBg < 100) {
-                const newRate = currentRate + 1;
-                adjustment = `<strong>Action:</strong> Increase rate by 1 unit/hr.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 100 && previousBg <= 180) {
-                const newRate = currentRate + 0.5;
-                adjustment = `<strong>Action:</strong> Increase rate by 0.5 unit/hr.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            }
-            else if (!isNaN(previousBg) && previousBg >= 181 && previousBg <= 200) {
-                const change = Math.max(currentRate * 0.25, 1.0);
-                const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1 unit/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 201 && previousBg <= 250) {
-                adjustment = "<strong>Action:</strong> No change to current rate.";
-                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
-                resultClass = 'result-therapeutic';
-            } else if (!isNaN(previousBg) && previousBg >= 251) {
-                const change = Math.max(currentRate * 0.25, 2);
-                const newRate = Math.max(0, currentRate - change);
-                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (25% or 2 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else {
-                const newRate = currentRate + 0.5;
-                adjustment = `<strong>Action:</strong> Increase rate by 0.5 units/hr.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            }
-        } 
-        else if (currentBg >= 201 && currentBg <= 250) {
-            if (!isNaN(previousBg) && previousBg <= 180) {
-                const change = Math.max(currentRate * 0.25, 2.0);
-                const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 2 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 181 && previousBg <= 300) {
-                const change = Math.max(currentRate * 0.25, 1.0);
-                const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1 unit/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 301 && previousBg <= 400) {
-                const newRate = currentRate + 1.0;
-                adjustment = `<strong>Action:</strong> Increase rate by 1 unit/hr.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg > 400) {
-                adjustment = "<strong>Action:</strong> No change to current rate.";
-                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
-                resultClass = 'result-therapeutic';
-            } else {
-                 const change = Math.max(currentRate * 0.25, 1.0);
-                 const newRate = Math.round((currentRate + change) * 10) / 10;
-                 adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (Fallback).`;
-                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            }
-        }
-        else if (currentBg >= 251 && currentBg <= 300) {
-             if (!isNaN(previousBg) && previousBg <= 140) {
-                const change = Math.max(currentRate * 0.25, 2.5);
-                const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 2.5 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 141 && previousBg <= 180) {
-                const change = Math.max(currentRate * 0.25, 1.5);
-                const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1.5 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 181 && previousBg <= 250) {
-                const change = Math.max(currentRate * 0.25, 1.0);
-                const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1 unit/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 251 && previousBg <= 300) {
-                const change = Math.max(currentRate * 0.25, 1.5);
-                const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1.5 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg >= 301 && previousBg <= 400) {
-                const change = Math.max(currentRate * 0.25, 2.0);
-                const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 2 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-            } else if (!isNaN(previousBg) && previousBg > 400) {
-                adjustment = "<strong>Action:</strong> No change to current rate.";
-                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
-                resultClass = 'result-therapeutic';
-            }
-        } 
-        else if (currentBg >= 301 && currentBg <= 400) {
-            const change = Math.max(currentRate * 0.40, 3.0);
-            const newRate = currentRate + change;
-            adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (40% or 3 units/hr, whichever is greater).`;
-            newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-        } 
-        else { 
-            const change = Math.max(currentRate * 0.50, 4.0);
-            const newRate = currentRate + change;
-            adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (50% or 4 units/hr, whichever is greater).`;
-            newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
-        }
-    }
-
-    resultsDiv.innerHTML = `
-        <div class="result-item ${resultClass}" style="text-align: left;">
-             <p>${adjustment}</p>
-             ${newRateInfo ? `<p style="margin-top: 0.5rem;">${newRateInfo}</p>` : ''}
-        </div>
-    `;
-    
-    addTimestamp(resultsDiv);
-    addCompletionIndicator(resultsDiv);
-    
-    const previousBg = parseInt(previousBgInput.value, 10);
-    const inputStr = `Current BG: ${currentBg}, Rate: ${currentRate}${!isNaN(previousBg) ? `, Prev BG: ${previousBg}` : ''}${isT1DM ? ', T1DM' : ''}`;
-    
-    addToHistory(
-        'Non-DKA Insulin Adjustment',
-        inputStr,
-        adjustment.replace(/<[^>]*>/g, '').substring(0, 50) + '...',
-        currentBg <= 70 || currentBg > 400
-    );
-}
-
-// --- DKA/HHS PROTOCOL ---
-function calculateDkaBolus() {
-    const weight = parseFloat(document.getElementById('bolus-weight').value);
-    const resultsDiv = document.getElementById('bolus-results');
-    
-    if (isNaN(weight) || weight <= 0) {
-        resultsDiv.innerHTML = `<p class="result-error">Please enter a valid weight.</p>`;
-        return;
-    }
-    
-    const bolusAmount = Math.min(weight * 0.1, 10); // 0.1 units/kg, max 10 units
-    resultsDiv.innerHTML = `<div class="result-item result-therapeutic">
-        <p><strong>Regular Insulin Bolus:</strong> ${bolusAmount.toFixed(1)} units IV</p>
-        <p style="margin-top: 0.5rem; font-size: 0.9em;">Calculated as 0.1 units/kg (Maximum: 10 units)</p>
-    </div>`;
-    
-    addTimestamp(resultsDiv);
-    addCompletionIndicator(resultsDiv);
-    
-    addToHistory(
-        'DKA Bolus Calculation',
-        `Weight: ${weight} kg`,
-        `Bolus: ${bolusAmount.toFixed(1)} units IV`,
-        false
-    );
-}
-
-function calculateDkaInitiation() {
-    const weight = parseFloat(document.getElementById('phase1-initiation-weight').value);
-    const resultsDiv = document.getElementById('phase1-initiation-results');
-    if (isNaN(weight) || weight <= 0) {
-        resultsDiv.innerHTML = `<p class="result-error">Please enter a valid weight.</p>`;
-        return;
-    }
-    const initialRate = weight * 0.1;
-    resultsDiv.innerHTML = `<div class="result-item result-therapeutic">
-        <p><strong>Initial Infusion Rate:</strong> ${initialRate.toFixed(1)} units/hr</p>
-        <p class="critical-warning" style="margin-top: 1rem;">Continue to Phase 1 Continuation only after 1 hour has passed.</p>
-    </div>`;
-    
-    addTimestamp(resultsDiv);
-    addCompletionIndicator(resultsDiv);
-    
-    addToHistory(
-        'DKA Phase 1 Initiation',
-        `Weight: ${weight} kg`,
-        `Initial Rate: ${initialRate.toFixed(1)} units/hr`,
-        false
-    );
-}
-
-function calculateDkaPhase1Continuation() {
-    const currentRate = parseFloat(document.getElementById('phase1-current-rate').value);
-    const rateChange = parseFloat(document.getElementById('phase1-rate-change').value);
-    const resultsDiv = document.getElementById('phase1-continuation-results');
-
-    if (isNaN(currentRate) || isNaN(rateChange) || currentRate < 0) {
-        resultsDiv.innerHTML = `<p class="result-error">Please enter valid Current Rate and BG Drop.</p>`;
-        return;
-    }
-
-    let adjustmentText = '';
-    let newRate = currentRate;
-    let resultClass = 'result-therapeutic'; 
-
-    if (rateChange <= 50) { 
-        newRate = currentRate * 1.5;
-        adjustmentText = `Increase current infusion rate by 50%.`;
-        resultClass = 'result-warning';
-    } else if (rateChange > 50 && rateChange <= 100) {
-        adjustmentText = `No change to infusion rate.`;
-    } else { // rateChange > 100
-        newRate = currentRate * 0.5;
-        adjustmentText = `Decrease current infusion rate by 50%.<br><strong class="critical-warning">Begin neuro checks q1hr x2 and BG checks q30min x2.</strong>`;
-        resultClass = 'result-critical';
-    }
-
-    resultsDiv.innerHTML = `
-        <div class="result-item ${resultClass}">
-            <p><strong>Action:</strong> ${adjustmentText}</p>
-            <p style="margin-top: 0.5rem;"><strong>New Infusion Rate:</strong> ${newRate.toFixed(1)} units/hr</p>
-        </div>`;
-    
-    addTimestamp(resultsDiv);
-    addCompletionIndicator(resultsDiv);
-    
-    addToHistory(
-        'DKA Phase 1 Continuation',
-        `Current Rate: ${currentRate}, BG Drop: ${rateChange}`,
-        `New Rate: ${newRate.toFixed(1)} units/hr`,
-        rateChange > 100
-    );
-}
-
-function calculateDkaTransition() {
-    const weight = parseFloat(document.getElementById('transition-weight').value);
-    const currentRate = parseFloat(document.getElementById('transition-current-rate').value);
-    const resultsDiv = document.getElementById('transition-results');
-
-    if (isNaN(weight) || weight <= 0 || isNaN(currentRate)) {
-        resultsDiv.innerHTML = `<p class="result-error">Please enter valid weight and current rate.</p>`;
-        return;
-    }
-
-    const calculatedRate = weight * 0.05;
-    const newRate = Math.min(calculatedRate, currentRate);
-    
-    resultsDiv.innerHTML = `
-        <div class="result-item result-therapeutic">
-            <p><strong>Calculated Transition Rate (0.05 units/kg/hr):</strong> ${calculatedRate.toFixed(1)} units/hr</p>
-            <p style="margin-top: 0.5rem;"><strong>New Infusion Rate (Use lower of the two):</strong> ${newRate.toFixed(1)} units/hr</p>
-            <p style="margin-top: 1rem;"><strong>Action:</strong> Change IVF to D5 1/2NS at 100 ml/hr and move to Phase 2 with next BG check.</p>
-        </div>`;
-    
-    addTimestamp(resultsDiv);
-    addCompletionIndicator(resultsDiv);
-    
-    addToHistory(
-        'DKA Transition Phase',
-        `Weight: ${weight} kg, Current Rate: ${currentRate}`,
-        `New Rate: ${newRate.toFixed(1)} units/hr`,
-        false
-    );
-}
-
-function calculateDkaPhase2() {
-    const currentRate = parseFloat(document.getElementById('phase2-current-rate').value);
-    const currentBg = parseInt(document.getElementById('phase2-current-bg').value, 10);
-    const resultsDiv = document.getElementById('phase2-results');
-
-    if (isNaN(currentRate) || isNaN(currentBg)) {
-        resultsDiv.innerHTML = `<p class="result-error">Please enter valid current rate and BG.</p>`;
-        return;
-    }
-
-    let adjustment = '', newRate = currentRate, resultClass = 'result-warning';
-    
-    if (currentBg > 250) {
-        newRate += 2;
-        adjustment = `<strong>Action:</strong> Increase rate by 2 units/hr.`;
-    } else if (currentBg >= 201) {
-        newRate += 1;
-        adjustment = `<strong>Action:</strong> Increase rate by 1 unit/hr.`;
-    } else if (currentBg >= 150) {
-        adjustment = "<strong>Action:</strong> No change to infusion rate.";
-        resultClass = 'result-therapeutic';
-    } else if (currentBg >= 70) {
-        newRate *= 0.5;
-        adjustment = `<strong>Action:</strong> Decrease rate by 50%.<br><strong>Follow-up:</strong> Recheck BG in 30 minutes.`;
-    } else { // BG < 70
-        newRate *= 0.5;
-        adjustment = `<strong class="critical-warning"><strong>Action</strong>: Stop infusion. Follow SDO for Hypoglycemia.</strong><br><strong>Resumption:</strong> When BG > 150 mg/dL, resume infusion at 50% of the most recent rate (${(currentRate * 0.5).toFixed(1)} units/hr).`;
-        resultClass = 'result-critical';
-    }
-    
-    resultsDiv.innerHTML = `
-        <div class="result-item ${resultClass}">
-            <p>${adjustment}</p>
-            ${currentBg >= 70 ? `<p style="margin-top: 0.5rem;"><strong>New Infusion Rate:</strong> ${newRate.toFixed(1)} units/hr</p>` : ''}
-        </div>`;
-    
-    addTimestamp(resultsDiv);
-    addCompletionIndicator(resultsDiv);
-    
-    addToHistory(
-        'DKA Phase 2',
-        `Current Rate: ${currentRate}, BG: ${currentBg}`,
-        `New Rate: ${newRate.toFixed(1)} units/hr`,
-        currentBg < 70
-    );
-}
-
-// --- Gemini AI ---
-const geminiSendBtn = document.getElementById('gemini-send-btn');
-const geminiInput = document.getElementById('gemini-input');
-const geminiChatBox = document.getElementById('gemini-chat-box');
-
-const handleGeminiChat = async () => {
-    const userMessage = geminiInput.value.trim();
-    if (!userMessage) return;
-    
-    if (!apiKey) {
-        appendMessage('Please set up your API key first.', 'bot error');
-        return;
-    }
-
-    appendMessage(userMessage, 'user');
-    geminiInput.value = '';
-    
-    const thinkingMessage = appendMessage('Thinking...', 'bot');
-
-    try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-
-        const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
-
-        const payload = {
-            contents: [{ 
-                parts: [{ 
-                    text: systemPrompt + "\n\nUser question: " + userMessage 
-                }] 
-            }],
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 1024,
-            }
-        };
-
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
-        }
-
-        const result = await response.json();
-        const candidate = result.candidates?.[0];
-
-        let botResponse = "Sorry, I couldn't process that request. Please try again.";
-        if (candidate && candidate.content?.parts?.[0]?.text) {
-            botResponse = candidate.content.parts[0].text;
-            botResponse += "\n\n*Remember: This is supplementary information only. Always use your clinical judgment and verify independently.*";
-        }
-
-        thinkingMessage.innerHTML = formatResponse(botResponse);
-
-    } catch (error) {
-        console.error("Gemini API Error:", error);
-        thinkingMessage.innerHTML = `Error: ${error.message}. Please check your API key and try again.`;
-        thinkingMessage.classList.add('error');
-    }
-};
-
-function appendMessage(message, sender) {
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('chat-message', `${sender.split(' ')[0]}-message`);
-    if (sender.includes('error')) {
-        messageElement.classList.add('error');
-    }
-    messageElement.innerHTML = `<p>${message}</p>`;
-    geminiChatBox.appendChild(messageElement);
-    geminiChatBox.scrollTop = geminiChatBox.scrollHeight;
-    return messageElement.querySelector('p');
-}
-
-function formatResponse(text) {
-    return text
-        .replace(/\n/g, '<br>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>');
-}
-
-if(geminiSendBtn && geminiInput){
-    geminiSendBtn.addEventListener('click', handleGeminiChat);
-    geminiInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            handleGeminiChat();
-        }
-    });
-}
+</body>
+</html>
 
