@@ -7,11 +7,13 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    <script type="module">
+      import { injectSpeedInsights } from 'https://cdn.skypack.dev/@vercel/speed-insights';
+      import { inject } from 'https://cdn.skypack.dev/@vercel/analytics';
+
+      injectSpeedInsights();
+      inject();
     </script>
-    <script defer src="https://cdn.vercel-insights.com/v1/script.debug.js"></script>
-    <script defer src="https://cdn.vercel-analytics.com/v1/script.debug.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
 </head>
