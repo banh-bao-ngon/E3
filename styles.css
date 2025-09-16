@@ -28,6 +28,11 @@ body.dark-mode {
     --shadow-color: rgba(0, 0, 0, 0.3);
 }
 
+/* === ADDED THIS RULE FOR THE FIX === */
+body.dark-mode .history-item.critical {
+    background: #4a2e2e; /* Dark reddish background for critical items in dark mode */
+}
+
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-main);
@@ -121,7 +126,7 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 1000;
+    z-index: 1000; /* Buttons are below the panel */
     transition: all 0.3s ease;
     box-shadow: 0 2px 10px var(--shadow-color);
 }
@@ -162,7 +167,7 @@ body {
     width: 400px;
     background: var(--bg-card);
     border-left: 2px solid var(--border-color);
-    z-index: 999;
+    z-index: 1001; /* Panel is on top of buttons */
     transition: right 0.3s ease;
     overflow-y: auto;
     box-shadow: -5px 0 20px var(--shadow-color);
@@ -339,13 +344,6 @@ body {
     flex-direction: column;
     gap: 1rem;
     margin: 1.5rem 0;
-}
-.feedback-form-row {
-    display: flex;
-    gap: 1rem;
-}
-.feedback-form-row input {
-    width: 50%;
 }
 
 .feedback-form input,
@@ -547,6 +545,7 @@ body {
     max-width: 1200px;
     margin: 0 auto;
     padding-top: 60px;
+    flex-grow: 1;
 }
 
 /* Tabs and Buttons */
@@ -1125,12 +1124,12 @@ h1 {
         width: 100%;
     }
     
-    .dark-mode-toggle, .history-toggle {
+    .dark-mode-toggle, .history-toggle, .feedback-toggle {
         width: 40px;
         height: 40px;
     }
     
-    .dark-mode-toggle i, .history-toggle i {
+    .dark-mode-toggle i, .history-toggle i, .feedback-toggle i {
         font-size: 16px;
     }
 }
@@ -1162,6 +1161,7 @@ h1 {
     .dark-mode-toggle,
     .history-toggle,
     .history-panel,
+    .feedback-toggle,
     .tabs,
     .api-key-setup,
     .chat-interface,
@@ -1228,7 +1228,7 @@ h1 {
 .site-footer {
     text-align: center;
     padding: 2rem 0;
-    margin-top: 2rem;
+    margin-top: auto;
     color: var(--text-light);
     font-size: 0.9em;
     border-top: 1px solid var(--border-color);
@@ -1236,4 +1236,3 @@ h1 {
 .site-footer p {
     margin: 0.25rem 0;
 }
-
