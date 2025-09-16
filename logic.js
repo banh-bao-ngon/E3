@@ -48,6 +48,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize tracking graph
     setTimeout(initTrackingGraph, 100);
 
+    // Initialize data summary
+    updateDataSummary();
+
     // Initialize calculator tools
     initCalculatorTools();
     
@@ -1181,6 +1184,7 @@ function addMonitoringData(protocolType, bgValue, infusionRate) {
 
     // Update graph with new data
     updateGraph();
+    updateDataSummary();
 }
 
 function checkDkaHhsConditions() {
@@ -1681,6 +1685,92 @@ function updateGraph() {
     trackingChart.data.labels = labels;
     trackingChart.data.datasets = datasets;
     trackingChart.update();
+}
+
+function clearTrackingData(type) {
+    const confirmations = {
+        'bg': 'Are you sure you want to clear all Blood Glucose data? This action cannot be undone.',
+        'rates': 'Are you sure you want to clear all Infusion Rate data? This action cannot be undone.',
+        'all': 'Are you sure you want to clear ALL tracking data? This will remove all Blood Glucose and Infusion Rate data. This action cannot be undone.'
+    };
+
+    if (!confirm(confirmations[type])) {
+        return;
+    }
+
+    const now = new Date();
+    let cleared = 0;
+
+    switch (type) {
+        case 'bg':
+            cleared += monitoringData.dkaHhs.bgReadings.length;
+            cleared += monitoringData.nonDka.bgReadings.length;
+            monitoringData.dkaHhs.bgReadings = [];
+            monitoringData.nonDka.bgReadings = [];
+            break;
+
+        case 'rates':
+            cleared += monitoringData.dkaHhs.infusionRates.length;
+            monitoringData.dkaHhs.infusionRates = [];
+            break;
+
+        case 'all':
+            cleared += monitoringData.dkaHhs.bgReadings.length;
+            cleared += monitoringData.dkaHhs.infusionRates.length;
+            cleared += monitoringData.nonDka.bgReadings.length;
+
+            monitoringData.dkaHhs.bgReadings = [];
+            monitoringData.dkaHhs.infusionRates = [];
+            monitoringData.nonDka.bgReadings = [];
+
+            // Also clear related flags that might no longer be relevant
+            monitoringData.dkaHhs.lastBgFlag = null;
+            monitoringData.dkaHhs.lastRateFlag = null;
+            monitoringData.nonDka.lastStableFlag = null;
+            break;
+    }
+
+    // Save changes and update displays
+    saveMonitoringData();
+    updateGraph();
+    updateDataSummary();
+    updateMonitoringStatus();
+
+    // Show confirmation
+    const typeNames = {
+        'bg': 'Blood Glucose',
+        'rates': 'Infusion Rate',
+        'all': 'All tracking'
+    };
+
+    showNotification(`${typeNames[type]} data cleared (${cleared} readings removed)`, 'info');
+}
+
+function updateDataSummary() {
+    const summaryElement = document.getElementById('data-summary-text');
+    if (!summaryElement) return;
+
+    const dkaBgCount = monitoringData.dkaHhs.bgReadings.length;
+    const dkaRateCount = monitoringData.dkaHhs.infusionRates.length;
+    const nonDkaBgCount = monitoringData.nonDka.bgReadings.length;
+
+    const totalReadings = dkaBgCount + dkaRateCount + nonDkaBgCount;
+
+    if (totalReadings === 0) {
+        summaryElement.textContent = 'No tracking data available';
+        summaryElement.className = 'data-summary-empty';
+    } else {
+        const parts = [];
+        if (dkaBgCount + nonDkaBgCount > 0) {
+            parts.push(`${dkaBgCount + nonDkaBgCount} BG readings`);
+        }
+        if (dkaRateCount > 0) {
+            parts.push(`${dkaRateCount} rate readings`);
+        }
+
+        summaryElement.textContent = `${totalReadings} total: ${parts.join(', ')}`;
+        summaryElement.className = 'data-summary-active';
+    }
 }
 
 // === CALCULATOR TOOLS ===
