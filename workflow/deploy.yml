@@ -1,0 +1,21 @@
+name: Deploy My App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use the API key
+        run: |
+          echo "Using the API Key to do something..."
+          # This command will use the API key from the environment variable
+          ./my-script.sh --api-key "$MY_API_KEY"
+        env:
+          MY_API_KEY: ${{ secrets.MY_API_KEY }}
