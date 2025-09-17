@@ -1,31 +1,59 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    --primary-blue: #007bff;
-    --primary-green: #28a745;
+    /* New Palette Colors */
+    --dark-moss-green: #606c38;
+    --pakistan-green: #283618;
+    --cornsilk: #fefae0;
+    --earth-yellow: #dda15e;
+    --tigers-eye: #bc6c25;
+
+    /* Safety-Critical Colors (Maintained) */
     --primary-red: #dc3545;
+    --warning-yellow: #ffc107;
+    --success-green: #28a745;
+
+    /* Updated Primary Colors */
+    --primary-blue: #606c38;
+    --primary-green: #28a745;
     --primary-grey: #6c757d;
-    --light-grey: #f8f9fa;
-    --border-color: #dee2e6;
-    --shadow-color: rgba(0, 0, 0, 0.06);
-    --text-dark: #212529;
-    --text-light: #495057;
-    --bg-main: #f0f4f8;
+    --accent-warm: #bc6c25;
+    --accent-earth: #dda15e;
+
+    /* Background and Text */
+    --light-grey: #fefae0;
+    --border-color: rgba(40, 54, 24, 0.15);
+    --shadow-color: rgba(40, 54, 24, 0.08);
+    --text-dark: #283618;
+    --text-light: #606c38;
+    --bg-main: linear-gradient(135deg, #fefae0 0%, #f8f5e4 100%);
     --bg-card: #ffffff;
     --success-light: #d4edda;
     --warning-light: #fff3cd;
     --danger-light: #f8d7da;
+
+    /* Accent Colors for Non-Critical Elements */
+    --accent-light: rgba(254, 250, 224, 0.6);
+    --accent-border: rgba(188, 108, 37, 0.2);
+    --gradient-primary: linear-gradient(135deg, #606c38 0%, #283618 100%);
+    --gradient-warm: linear-gradient(135deg, #dda15e 0%, #bc6c25 100%);
+    --gradient-light: linear-gradient(135deg, #fefae0 0%, #f0ebd8 100%);
 }
 
 /* Dark Mode Variables */
 body.dark-mode {
-    --bg-main: #1a1a1a;
-    --bg-card: #2d2d2d;
-    --text-dark: #e0e0e0;
-    --text-light: #b0b0b0;
-    --border-color: #404040;
-    --light-grey: #333333;
-    --shadow-color: rgba(0, 0, 0, 0.3);
+    --bg-main: linear-gradient(135deg, #1a1f14 0%, #0f1209 100%);
+    --bg-card: #2a2f20;
+    --text-dark: #fefae0;
+    --text-light: #dda15e;
+    --border-color: rgba(96, 108, 56, 0.3);
+    --light-grey: #3a3f30;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --accent-light: rgba(40, 54, 24, 0.3);
+    --accent-border: rgba(221, 161, 94, 0.3);
+    --gradient-primary: linear-gradient(135deg, #3a4026 0%, #1a1f14 100%);
+    --gradient-warm: linear-gradient(135deg, #8b6635 0%, #74511c 100%);
+    --gradient-light: linear-gradient(135deg, #2a2f20 0%, #3a3f30 100%);
 }
 
 /* === ADDED THIS RULE FOR THE FIX === */
@@ -35,8 +63,7 @@ body.dark-mode .history-item.critical {
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: var(--bg-main);
-    background-image: linear-gradient(to bottom, var(--bg-main), var(--bg-main));
+    background: var(--bg-main);
     color: var(--text-dark);
     margin: 0;
     padding: 20px;
@@ -579,11 +606,11 @@ body {
 
 /* --- Unique Colors for Each Active Tab --- */
 .tab-button[data-protocol="heparin"].active {
-    background-color: var(--primary-blue);
-    color: white;
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    background: var(--gradient-primary);
+    color: var(--cornsilk);
+    box-shadow: 0 4px 12px var(--shadow-color);
     transform: translateY(-2px);
-    border-color: var(--primary-blue);
+    border-color: var(--dark-moss-green);
 }
 
 .tab-button[data-protocol="insulin"].active {
@@ -592,6 +619,14 @@ body {
     box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
     transform: translateY(-2px);
     border-color: var(--primary-green);
+}
+
+.tab-button[data-protocol="calculator"].active {
+    background: var(--gradient-warm);
+    color: white;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    transform: translateY(-2px);
+    border-color: var(--tigers-eye);
 }
 
 .tab-button[data-protocol="gemini-ai"].active {
@@ -603,11 +638,11 @@ body {
 }
 
 .tab-button[data-protocol="other"].active {
-    background-color: var(--primary-grey);
-    color: white;
-    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    background: var(--gradient-light);
+    color: var(--text-dark);
+    box-shadow: 0 4px 12px var(--shadow-color);
     transform: translateY(-2px);
-    border-color: var(--primary-grey);
+    border-color: var(--accent-border);
 }
 
 .tab-content {
@@ -1303,8 +1338,8 @@ h1 {
 }
 
 .monitoring-header {
-    background: var(--primary-blue);
-    color: white;
+    background: var(--gradient-primary);
+    color: var(--cornsilk);
     padding: 1rem;
     display: flex;
     justify-content: space-between;
@@ -1835,12 +1870,14 @@ body.dark-mode .notification {
 }
 
 .calc-section h2 {
-    color: var(--primary-blue);
+    color: var(--dark-moss-green);
     margin-bottom: 1.5rem;
     font-size: 1.3rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    border-bottom: 2px solid var(--accent-border);
+    padding-bottom: 0.5rem;
 }
 
 /* Weight Converter Styles */
@@ -1876,7 +1913,8 @@ body.dark-mode .notification {
 
 .weight-converter input:focus {
     outline: none;
-    border-color: var(--primary-blue);
+    border-color: var(--accent-warm);
+    box-shadow: 0 0 0 3px var(--accent-light);
 }
 
 .conversion-arrow {
@@ -1884,8 +1922,13 @@ body.dark-mode .notification {
     align-items: center;
     justify-content: center;
     padding: 0.75rem;
-    color: var(--primary-blue);
+    color: var(--accent-warm);
     font-size: 1.2rem;
+    background: var(--accent-light);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
 }
 
 /* Basic Calculator Styles */
@@ -1944,17 +1987,17 @@ body.dark-mode .notification {
 }
 
 .calc-operator {
-    background: var(--primary-blue);
-    color: white;
+    background: var(--gradient-primary);
+    color: var(--cornsilk);
 }
 
 .calc-clear {
-    background: var(--primary-grey);
+    background: var(--accent-earth);
     color: white;
 }
 
 .calc-equals {
-    background: var(--primary-green);
+    background: var(--gradient-warm);
     color: white;
     grid-row: span 2;
 }
@@ -2016,13 +2059,32 @@ body.dark-mode .calc-display input {
 /* === OTHER PROTOCOLS STYLES === */
 
 .coming-soon-section {
-    background: linear-gradient(135deg, var(--primary-blue), #5a9fd4);
-    color: white;
+    background: var(--gradient-primary);
+    color: var(--cornsilk);
     border-radius: 15px;
     padding: 3rem 2rem;
     text-align: center;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 4px 20px var(--shadow-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.coming-soon-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-warm);
+    opacity: 0.1;
+    z-index: 0;
+}
+
+.coming-soon-content {
+    position: relative;
+    z-index: 1;
 }
 
 .coming-soon-content {
