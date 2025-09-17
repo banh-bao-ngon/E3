@@ -1,123 +1,42 @@
-# Clinical Protocols Calculator
+ Core Protocol Calculations
 
-A comprehensive web-based clinical calculator for healthcare professionals with automated monitoring, scheduled notifications, and AI assistance.
+  - Heparin Protocol - APTT-based heparin dosing adjustments
+  - Non-DKA Insulin Rate - Initial insulin infusion rate calculations
+  - Non-DKA Insulin Adjustment - Rate adjustments based on glucose trends
+  - DKA/HHS Protocol - Complete diabetic ketoacidosis management:
+    - Bolus calculations
+    - Phase 1 initiation and continuation
+    - Transition phase
+    - Phase 2 management
 
-## 🚀 Live Demo
-[Visit the live website](https://your-vercel-app.vercel.app) *(Replace with your actual Vercel URL)*
+  Clinical Monitoring System
 
-## ✨ Features
+  - Real-time tracking of blood glucose and infusion rates
+  - Automated alerts for critical conditions:
+    - DKA: BG >250 for 2+ hours, rate <2.0 for 4+ hours
+    - Non-DKA: stable BG (100-180) for 6+ hours
+  - Timer system for assessment scheduling
+  - Data visualization with interactive charts
 
-- **Clinical Protocols**: Heparin and Insulin protocols with automated calculations
-- **Real-time Monitoring**: Blood glucose and infusion rate tracking with visual graphs
-- **Scheduled Notifications**: Automatic reminders at 11 AM and 3 PM CST
-- **AI Assistant**: Clinical question answering with Gemini AI
-- **Calculator Tools**: Weight converter and basic calculator
-- **Dark Mode**: Professional dark theme option
+  Utility Tools
 
-## 🛠️ Local Development Setup
+  - Weight converter (lbs ↔ kg)
+  - Basic calculator with standard operations
+  - AI assistant (Gemini integration) for clinical questions
 
-### Prerequisites
-- A Gemini AI API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+  User Interface Features
 
-### Quick Start
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/yourusername/clinical-protocols-calculator.git
-   cd clinical-protocols-calculator
-   ```
+  - Multi-tab interface for different protocols
+  - Dark mode toggle
+  - Calculation history with critical value highlighting
+  - Clinical disclaimer system
+  - Notification system for alerts and reminders
 
-2. **Set up environment variables:**
-   ```bash
-   cp .env.example .env
-   ```
+  Data Management
 
-3. **Edit `.env` and add your API key:**
-   ```
-   VITE_GEMINI_API_KEY=your_actual_api_key_here
-   ```
+  - Local storage for history and preferences
+  - Export/tracking capabilities for audit trails
+  - Critical value flagging and acknowledgment system
 
-4. **Open `index.html` in your browser**
-
-## 🚀 Vercel Deployment
-
-### Automatic Deployment (Recommended)
-1. **Fork this repository** to your GitHub account
-
-2. **Connect to Vercel:**
-   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
-   - Click "New Project"
-   - Import your GitHub repository
-
-3. **Set Environment Variables:**
-   - In Vercel project settings → Environment Variables
-   - Add: `VITE_GEMINI_API_KEY` = `your_actual_api_key_here`
-   - Environment: All (Production, Preview, Development)
-
-4. **Deploy!**
-   - Vercel will automatically deploy on every push to main branch
-
-### Manual Deployment
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel
-
-# Set environment variable
-vercel env add VITE_GEMINI_API_KEY
-```
-
-## 🔒 Security Features
-
-- **Environment Variables**: API keys stored securely in Vercel
-- **No Keys in Code**: All sensitive data handled via environment variables
-- **Auto HTTPS**: Vercel provides automatic SSL certificates
-- **Security Headers**: XSS protection and content security policies
-
-## 📱 Usage
-
-### Clinical Protocols
-- **Heparin Protocol**: Enter aPTT values for dose calculations
-- **Insulin Protocol**: Choose between Non-DKA and DKA/HHS protocols
-
-### Monitoring System
-- **Real-time Graphs**: Track blood glucose and infusion rates
-- **Automated Flags**: Get alerts for critical values
-- **Timer System**: 1-hour countdown for regular monitoring
-
-### AI Assistant
-- Ask clinical questions in the "Dat AI Assistant" tab
-- Get evidence-based responses for protocols and calculations
-- **Important**: Always verify AI responses with clinical judgment
-
-## 🔧 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Test locally with your `.env` file
-5. Commit: `git commit -m "Add feature"`
-6. Push: `git push origin feature-name`
-7. Create a Pull Request
-
-## ⚠️ Important Notes
-
-- **Clinical Use**: This tool is for reference only - always use clinical judgment
-- **API Key Security**: Never commit your `.env` file to version control
-- **Environment Variables**: Use Vercel dashboard to manage production API keys
-- **HIPAA Compliance**: No patient data is stored or transmitted
-
-## 📞 Support
-
-- **Issues**: Report bugs via GitHub Issues
-- **Questions**: Use GitHub Discussions
-- **Security**: Email security@yourproject.com for vulnerabilities
-
-## 📄 License
-
-© 2025 BANH BAO - Developed, tested, and overseen by Banh Bao
-
----
-
-**Disclaimer**: This tool is for clinical reference only. Always use clinical judgment and verify calculations independently.
+  The application is designed specifically for healthcare professionals to safely calculate medication dosages and
+  monitor patient protocols.
