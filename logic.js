@@ -1,4 +1,5 @@
 // Global variables for enhanced features
+console.log('Logic.js script loaded successfully');
 let calculationHistory = [];
 let pendingCalculation = null;
 let apiKey = localStorage.getItem('gemini_api_key') || '';
@@ -13,6 +14,7 @@ let monitoringData = {
     },
     nonDka: {
         bgReadings: [], // {timestamp, value, protocolType}
+        infusionRates: [], // {timestamp, value, protocolType}
         lastStableFlag: null
     },
     activeFlags: [], // {type, message, timestamp, acknowledged}
@@ -26,6 +28,8 @@ let monitoringData = {
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded event fired - initializing application');
+
     // Check disclaimer acceptance
     checkDisclaimer();
     
@@ -54,21 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize calculator tools
     initCalculatorTools();
     
-    // --- TAB NAVIGATION ---
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const protocolContents = document.querySelectorAll('.protocol-content');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const protocol = button.dataset.protocol;
-            
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            protocolContents.forEach(content => content.classList.remove('active'));
-
-            button.classList.add('active');
-            document.getElementById(`${protocol}-protocol-content`).classList.add('active');
-        });
-    });
+    // Tab navigation is now handled by onclick handlers in HTML
 
     // --- INSULIN PROTOCOL DROPDOWN ---
     const insulinSelect = document.getElementById('insulin-protocol-select');
@@ -157,55 +147,52 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- EVENT LISTENERS FOR ENTER KEY ---
-    function addEnterListener(inputId, callback) {
-        const input = document.getElementById(inputId);
-        if (input) {
-            input.addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault();
-                    callback();
-                }
-            });
-        }
-    }
+    // Keyboard functionality now handled by direct HTML onkeypress/onkeydown handlers
+});
 
-    // Add Enter key listeners to all inputs
-    addEnterListener('heparin-aptt', getHeparinInstructions);
-    addEnterListener('insulin-bg', calculateInsulinRate);
-    ['current-rate', 'previous-bg', 'current-bg-adj'].forEach(id => addEnterListener(id, calculateInsulinAdjustment));
-    addEnterListener('bolus-weight', calculateDkaBolus);
-    addEnterListener('lbs-input', calculateDkaBolus);
-    addEnterListener('kg-input', calculateDkaBolus);
-    addEnterListener('phase1-initiation-weight', calculateDkaInitiation);
-    addEnterListener('phase1-current-rate', calculateDkaPhase1Continuation);
-    addEnterListener('phase1-rate-change', calculateDkaPhase1Continuation);
-    addEnterListener('transition-weight', calculateDkaTransition);
-    addEnterListener('transition-current-rate', calculateDkaTransition);
-    addEnterListener('phase2-current-rate', calculateDkaPhase2);
-    addEnterListener('phase2-current-bg', calculateDkaPhase2);
-    addEnterListener('gemini-input', handleGeminiChat);
-    
-    // --- MODAL KEYBOARD SHORTCUTS ---
-    window.addEventListener('keydown', (event) => {
-        const activeModal = document.querySelector('.modal.active');
-        if (activeModal) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const confirmButton = activeModal.querySelector('.confirm-btn');
-                if (confirmButton) {
-                    confirmButton.click();
-                }
-            } else if (event.key === 'Escape') {
-                event.preventDefault();
-                const cancelButton = activeModal.querySelector('.cancel-btn');
-                if (cancelButton) {
-                    cancelButton.click();
-                }
+// === GLOBAL KEYBOARD HANDLER ===
+function handleGlobalKeydown(event) {
+    const activeModal = document.querySelector('.modal.active');
+    if (activeModal) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const confirmButton = activeModal.querySelector('.confirm-btn');
+            if (confirmButton) {
+                confirmButton.click();
+            }
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            const cancelButton = activeModal.querySelector('.cancel-btn');
+            if (cancelButton) {
+                cancelButton.click();
             }
         }
-    });
-});
+    }
+}
+
+// === TAB NAVIGATION FUNCTION ===
+function switchTab(protocol) {
+    console.log('Switching to tab:', protocol);
+
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const protocolContents = document.querySelectorAll('.protocol-content');
+
+    // Remove active class from all tabs and contents
+    tabButtons.forEach(btn => btn.classList.remove('active'));
+    protocolContents.forEach(content => content.classList.remove('active'));
+
+    // Add active class to clicked tab
+    const clickedTab = document.querySelector(`[data-protocol="${protocol}"]`);
+    if (clickedTab) {
+        clickedTab.classList.add('active');
+    }
+
+    // Show corresponding content
+    const content = document.getElementById(`${protocol}-protocol-content`);
+    if (content) {
+        content.classList.add('active');
+    }
+}
 
 // === ENHANCED FEATURES ===
 
@@ -1175,6 +1162,19 @@ function addMonitoringData(protocolType, bgValue, infusionRate) {
                 reading => reading.timestamp > cutoff
             );
         }
+
+        if (infusionRate !== null && infusionRate !== undefined) {
+            monitoringData.nonDka.infusionRates.push({
+                timestamp,
+                value: infusionRate,
+                protocolType
+            });
+            // Keep only last 24 hours of readings
+            const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            monitoringData.nonDka.infusionRates = monitoringData.nonDka.infusionRates.filter(
+                reading => reading.timestamp > cutoff
+            );
+        }
     }
 
     // Check for flag conditions after adding new data
@@ -1305,6 +1305,11 @@ function loadMonitoringData() {
                             }));
                         }
                     });
+
+                    // Initialize infusionRates for nonDka if it doesn't exist (backward compatibility)
+                    if (type === 'nonDka' && !parsed[type].infusionRates) {
+                        parsed[type].infusionRates = [];
+                    }
                     if (parsed[type].lastBgFlag) {
                         parsed[type].lastBgFlag = new Date(parsed[type].lastBgFlag);
                     }
@@ -1482,7 +1487,7 @@ function updateMonitoringStatus() {
     if (!statusContainer) return;
 
     const dkaReadings = monitoringData.dkaHhs.bgReadings.length + monitoringData.dkaHhs.infusionRates.length;
-    const nonDkaReadings = monitoringData.nonDka.bgReadings.length;
+    const nonDkaReadings = monitoringData.nonDka.bgReadings.length + monitoringData.nonDka.infusionRates.length;
     const totalReadings = dkaReadings + nonDkaReadings;
     const activeFlags = monitoringData.activeFlags.filter(f => !f.acknowledged).length;
 
@@ -1624,6 +1629,23 @@ function updateGraph() {
         }
     });
 
+    monitoringData.nonDka.infusionRates.forEach(reading => {
+        if (reading.timestamp >= cutoffTime) {
+            const existing = allData.find(d =>
+                Math.abs(d.timestamp.getTime() - reading.timestamp.getTime()) < 60000
+            );
+            if (existing) {
+                existing.rate = reading.value;
+            } else {
+                allData.push({
+                    timestamp: reading.timestamp,
+                    rate: reading.value,
+                    type: 'non-dka'
+                });
+            }
+        }
+    });
+
     // Sort by timestamp
     allData.sort((a, b) => a.timestamp - b.timestamp);
 
@@ -1711,17 +1733,21 @@ function clearTrackingData(type) {
 
         case 'rates':
             cleared += monitoringData.dkaHhs.infusionRates.length;
+            cleared += monitoringData.nonDka.infusionRates.length;
             monitoringData.dkaHhs.infusionRates = [];
+            monitoringData.nonDka.infusionRates = [];
             break;
 
         case 'all':
             cleared += monitoringData.dkaHhs.bgReadings.length;
             cleared += monitoringData.dkaHhs.infusionRates.length;
             cleared += monitoringData.nonDka.bgReadings.length;
+            cleared += monitoringData.nonDka.infusionRates.length;
 
             monitoringData.dkaHhs.bgReadings = [];
             monitoringData.dkaHhs.infusionRates = [];
             monitoringData.nonDka.bgReadings = [];
+            monitoringData.nonDka.infusionRates = [];
 
             // Also clear related flags that might no longer be relevant
             monitoringData.dkaHhs.lastBgFlag = null;
@@ -1753,8 +1779,9 @@ function updateDataSummary() {
     const dkaBgCount = monitoringData.dkaHhs.bgReadings.length;
     const dkaRateCount = monitoringData.dkaHhs.infusionRates.length;
     const nonDkaBgCount = monitoringData.nonDka.bgReadings.length;
+    const nonDkaRateCount = monitoringData.nonDka.infusionRates.length;
 
-    const totalReadings = dkaBgCount + dkaRateCount + nonDkaBgCount;
+    const totalReadings = dkaBgCount + dkaRateCount + nonDkaBgCount + nonDkaRateCount;
 
     if (totalReadings === 0) {
         summaryElement.textContent = 'No tracking data available';
@@ -1764,8 +1791,8 @@ function updateDataSummary() {
         if (dkaBgCount + nonDkaBgCount > 0) {
             parts.push(`${dkaBgCount + nonDkaBgCount} BG readings`);
         }
-        if (dkaRateCount > 0) {
-            parts.push(`${dkaRateCount} rate readings`);
+        if (dkaRateCount + nonDkaRateCount > 0) {
+            parts.push(`${dkaRateCount + nonDkaRateCount} rate readings`);
         }
 
         summaryElement.textContent = `${totalReadings} total: ${parts.join(', ')}`;
