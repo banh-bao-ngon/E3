@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Vercel Analytics temporarily disabled for debugging -->
+    <!--
     <script type="module">
       import { injectSpeedInsights } from 'https://cdn.skypack.dev/@vercel/speed-insights';
       import { inject } from 'https://cdn.skypack.dev/@vercel/analytics';
@@ -14,10 +16,11 @@
       injectSpeedInsights();
       inject();
     </script>
+    -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#007bff">
 </head>
-<body>
+<body onkeydown="handleGlobalKeydown(event)">
 <!-- Clinical Disclaimer Banner -->
 <div id="disclaimer-banner" class="disclaimer-banner">
     <i class="fas fa-exclamation-triangle"></i>
@@ -144,11 +147,11 @@
 
  <div class="main-wrapper">
      <div class="tabs">
-         <button class="tab-button active" data-protocol="heparin">Heparin Protocol</button>
-         <button class="tab-button" data-protocol="insulin">Insulin Protocol</button>
-         <button class="tab-button" data-protocol="calculator">Calculator</button>
-         <button class="tab-button" data-protocol="gemini-ai">Dat AI Assistant</button>
-         <button class="tab-button" data-protocol="other">Other Protocols</button>
+         <button class="tab-button active" data-protocol="heparin" onclick="switchTab('heparin')">Heparin Protocol</button>
+         <button class="tab-button" data-protocol="insulin" onclick="switchTab('insulin')">Insulin Protocol</button>
+         <button class="tab-button" data-protocol="calculator" onclick="switchTab('calculator')">Calculator</button>
+         <button class="tab-button" data-protocol="gemini-ai" onclick="switchTab('gemini-ai')">Dat AI Assistant</button>
+         <button class="tab-button" data-protocol="other" onclick="switchTab('other')">Other Protocols</button>
      </div>
 
      <div class="tab-content">
@@ -158,7 +161,7 @@
                  <h1>Heparin Anticoagulation Protocol</h1>
                  <div class="input-group">
                      <label for="heparin-aptt">Enter aPTT value:</label>
-                     <input type="number" id="heparin-aptt" min="0" max="500" placeholder="e.g., 85">
+                     <input type="number" id="heparin-aptt" min="0" max="500" placeholder="e.g., 85" onkeypress="if(event.key==='Enter'){event.preventDefault();getHeparinInstructions();}">
                      <button onclick="getHeparinInstructions()">Get Instructions</button>
                      <a href="heparinQuickGuide-StandardVTE.pdf" download>Download Protocol PDF</a>
                  </div>
@@ -222,7 +225,7 @@
                          <h3>Calculation of Initial Infusion Rate</h3>
                          <div class="input-group">
                              <label for="insulin-bg">Enter Current BG (mg/dL):</label>
-                             <input type="number" id="insulin-bg" min="0" max="1500" placeholder="e.g., 210">
+                             <input type="number" id="insulin-bg" min="0" max="1500" placeholder="e.g., 210" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateInsulinRate();}">
                              <button onclick="calculateInsulinRate()">Calculate Rate</button>
                          </div>
                          <div id="insulin-rate-results" class="results-container"></div>
@@ -240,7 +243,7 @@
                          <div class="input-stack">
                              <div class="input-row">
                                  <label for="current-rate">Current Rate (units/hr):</label>
-                                 <input type="number" id="current-rate" min="0" max="100" step="0.1" placeholder="e.g., 3.5">
+                                 <input type="number" id="current-rate" min="0" max="100" step="0.1" placeholder="e.g., 3.5" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateInsulinAdjustment();}">
                              </div>
                              <div class="input-row" id="previous-bg-row" style="display: none;">
                                  <label for="previous-bg">Previous BG (mg/dL):</label>
@@ -248,7 +251,7 @@
                              </div>
                              <div class="input-row">
                                  <label for="current-bg-adj">Current BG (mg/dL):</label>
-                                 <input type="number" id="current-bg-adj" min="0" max="1500" placeholder="e.g., 210">
+                                 <input type="number" id="current-bg-adj" min="0" max="1500" placeholder="e.g., 210" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateInsulinAdjustment();}">
                              </div>
                              <div class="input-checkbox-row">
                                 <label for="type-1-dm">Type 1 DM:</label>
@@ -546,7 +549,7 @@
                             </div>
                         </div>
                         <div class="chat-input-area">
-                            <input type="text" id="gemini-input" placeholder="Ask a clinical question...">
+                            <input type="text" id="gemini-input" placeholder="Ask a clinical question..." onkeypress="if(event.key==='Enter'){event.preventDefault();handleGeminiChat();}">
                             <button id="gemini-send-btn"><i class="fas fa-paper-plane"></i></button>
                         </div>
                         <button onclick="changeApiKey()" class="change-key-btn">Change API Key</button>
@@ -659,12 +662,15 @@
 </footer>
 
  <script src="logic.js"></script>
+ <!-- Service Worker temporarily disabled for debugging -->
+ <!--
  <script>
      // Register Service Worker for offline capability
      if ('serviceWorker' in navigator) {
          navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed'));
      }
  </script>
+ -->
 
 </body>
 </html>
