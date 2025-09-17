@@ -2,8 +2,10 @@
 console.log('Logic.js script loaded successfully');
 let calculationHistory = [];
 let pendingCalculation = null;
-// Embedded API key for seamless AI functionality
-const EMBEDDED_API_KEY = '';
+// API key from Vercel environment variables (injected at build time)
+const EMBEDDED_API_KEY = typeof process !== 'undefined' && process.env && process.env.VITE_GEMINI_API_KEY
+    ? process.env.VITE_GEMINI_API_KEY
+    : 'AIzaSyAoIyKIQ3iPgSF3Dnb-3aj2oJ7yDxFSK90'; // Fallback for local development
 
 // Monitoring system variables
 let monitoringData = {
