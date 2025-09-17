@@ -1,64 +1,163 @@
- ✅ Completed Enhancements
 
-  1. 📊 Tracking Data Graph
+  🏥 Clinical Protocols
 
-  - Real-time Visualization: Added Chart.js integration for dynamic data tracking
-  - Multiple Graph Types: Users can view Blood Glucose, Infusion Rate, or both on the same chart
-  - Time Filtering: Options for 6, 12, or 24-hour data views
-  - Dual Y-Axes: When viewing both metrics, each has its own scale for accurate comparison
-  - Auto-Updates: Graph refreshes automatically when new calculations are performed
+  Heparin Protocol
 
-  2. 🎯 Reduced Header Spacing
+  - aPTT value input with Enter key support
+  - Automatic dose adjustment calculations
+  - Critical value flagging with pulsating red alerts
+  - PDF protocol download
+  - Real-time monitoring integration
 
-  - Compact Disclaimer: Reduced banner padding from 15px to 8px with smaller font size
-  - Optimized Button Positioning: Moved all floating buttons closer together
-  - Minimal Scrolling: Users can see content faster without excessive vertical space
+  Insulin Protocols
 
-  3. 🔄 Monitoring Button Improvements
+  - Non-DKA/HHS Protocol:
+    - Initial infusion rate calculation
+    - Rate adjustment based on current/previous BG
+    - Type 1 DM considerations
+    - Dynamic previous BG field (appears when current BG > 100)
+  - DKA/HHS Protocol:
+    - Phase 1: Initiation & Continuation
+    - Transition Phase
+    - Phase 2: Maintenance
+    - Bolus calculator with weight converter
+    - Phase navigation with tabs
 
-  - Right-Side Positioning: Moved monitoring button to match other floating buttons
-  - White Color Scheme: Changed from blue to white with border to maintain visual consistency
-  - Proper Ordering: Positioned at bottom of button stack (after feedback button)
+  📊 Monitoring & Alerts System
 
-  4. 🧮 New Calculator Tab
+  Real-time Tracking
 
-  - Weight Converter: Standalone lbs ↔ kg converter with real-time bidirectional updates
-  - Basic Math Calculator: Full-featured calculator with:
-    - Addition, subtraction, multiplication, division
-    - Clear (C) and Clear Entry (CE) functions
-    - Professional calculator layout with proper button grid
-    - Error handling and input validation
-    - Visual feedback with button animations
+  - Blood glucose trend monitoring
+  - Infusion rate tracking
+  - Interactive Chart.js graphs with multiple views
+  - 6/12/24 hour timeframe selection
+  - Data point visualization over time
 
-  5. 📋 Updated Other Protocols Tab
+  Clinical Flagging
 
-  - Coming Soon Section: Professional "under development" area with planned features
-  - Future Protocol Preview: Lists upcoming cardiac, respiratory, medication, lab, and emergency protocols
-  - Quick Reference Cards: Organized clinical reference values in an easy-to-scan format
-  - Visual Enhancement: Gradient background and card-based layout for better organization
+  - DKA/HHS Flags: BG > 250 for 2+ hrs, rate < 2.0 for 4+ hrs
+  - Non-DKA Flags: Stable BG 100-180 for 6+ hrs
+  - Visual flag badges with notifications
+  - Automatic provider alerts
 
-  🔧 Technical Improvements
+  Timer System
 
-  Enhanced Monitoring System
+  - 1-hour countdown timer
+  - Start/reset/stop controls
+  - Visual progress indication
+  - Integration with monitoring workflow
 
-  - Graph data updates automatically when calculations are performed
-  - Chart.js integration provides professional data visualization
-  - Responsive design ensures graphs work on all screen sizes
+  🕐 Scheduled Notifications
 
-  Improved User Experience
+  - Internal clock with CST time zone handling
+  - Automatic alerts at 11 AM and 3 PM CST
+  - "VS TIME & FINISH HEAD-TO-TOE ASSESSMENT" reminders
+  - Modal popup notifications
+  - Auto-dismiss after 30 seconds
 
-  - Streamlined interface with reduced vertical space usage
-  - Consistent floating button styling and positioning
-  - Professional calculator interface with haptic-style feedback
-  - Mobile-responsive design for all new components
+  🧮 Calculator Tools
 
-  Code Organization
+  Weight Converter
 
-  - Modular calculator functions with proper error handling
-  - Chart initialization and update functions
-  - CSS organization with dedicated sections for each feature
-  - Maintained existing functionality while adding new features
+  - Pounds ↔ Kilograms conversion
+  - Real-time calculation as you type
+  - Integration with DKA bolus calculations
 
-  The application now provides healthcare professionals with comprehensive monitoring tools, visual data tracking,
-  convenient calculation utilities, and a clean, efficient interface that minimizes scrolling while maximizing
-  functionality.
+  Basic Calculator
+
+  - Color-coded buttons:
+    - Gray: Numbers (0-9, .)
+    - Orange: Operators (+, -, ×, ÷)
+    - Red: Clear functions (C, CE)
+    - Green: Equals (=)
+  - Standard arithmetic operations
+  - Clear entry and clear all functions
+
+  🤖 AI Assistant (Dat AI)
+
+  - Embedded API key (no user setup required)
+  - Clinical question answering
+  - Medical protocol guidance
+  - Drug interaction information
+  - Disclaimer: Supplementary use only
+  - Chat interface with message history
+
+  📱 User Interface Features
+
+  Navigation
+
+  - Tab-based protocol switching
+  - Floating action buttons (dark mode, history, monitoring, feedback)
+  - Smooth tab transitions
+  - Keyboard navigation (Enter/Escape keys)
+
+  Dark Mode
+
+  - True dark theme with deep black/gray backgrounds
+  - Consistent color scheme across all elements
+  - High contrast text for readability
+  - Theme persistence
+
+  Data Management
+
+  - Calculation History: Track all calculations with timestamps
+  - Data Export: Clear individual or all tracking data
+  - Local Storage: Persistent data between sessions
+  - Selective Clearing: Remove specific data types
+
+  🎨 Visual Features
+
+  Color-Coded Results
+
+  - Green: Therapeutic/good values
+  - Yellow: Warning values
+  - Red: Critical values (with pulsating background)
+  - Consistent theming in light and dark modes
+
+  Responsive Design
+
+  - Mobile-friendly interface
+  - Touch-optimized buttons
+  - Adaptive layouts
+  - Progressive Web App (PWA) ready
+
+  Status Indicators
+
+  - Completion checkmarks
+  - Critical value animations
+  - Progress indicators
+  - Flag badges
+
+  ⚡ Technical Features
+
+  Real-time Updates
+
+  - Live data synchronization
+  - Automatic graph updates
+  - Dynamic form validation
+  - Instant calculations
+
+  Error Handling
+
+  - Input validation
+  - Graceful error messages
+  - Fallback mechanisms
+  - Debug logging
+
+  Performance
+
+  - Chart.js integration
+  - Efficient data processing
+  - Smooth animations
+  - Fast load times
+
+  🔒 Safety Features
+
+  - Clinical disclaimers
+  - Critical value alerts
+  - Verification prompts
+  - Professional use warnings
+  - Color-coded urgency levels
+
+  This comprehensive clinical calculator provides healthcare professionals with automated calculations, real-time
+  monitoring, scheduled reminders, and AI assistance—all designed for safe, efficient patient care! 🚀
