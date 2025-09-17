@@ -283,7 +283,7 @@
                             <div class="input-stack">
                                 <div class="input-row">
                                     <label for="phase1-initiation-weight">Patient Weight (kg):</label>
-                                    <input type="number" id="phase1-initiation-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                                    <input type="number" id="phase1-initiation-weight" min="0" max="500" step="0.1" placeholder="e.g., 70" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaInitiation();}">
                                 </div>
                             </div>
                             <div class="input-group">
@@ -298,11 +298,11 @@
                             <div class="input-stack">
                                 <div class="input-row">
                                     <label for="phase1-current-rate">Current Rate (units/hr):</label>
-                                    <input type="number" id="phase1-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0">
+                                    <input type="number" id="phase1-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaPhase1Continuation();}">
                                 </div>
                                 <div class="input-row">
                                     <label for="phase1-rate-change">BG Drop (mg/dL/hr):</label>
-                                    <input type="number" id="phase1-rate-change" min="0" max="500" placeholder="e.g., 60">
+                                    <input type="number" id="phase1-rate-change" min="0" max="500" placeholder="e.g., 60" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaPhase1Continuation();}">
                                 </div>
                             </div>
                             <div class="input-group">
@@ -325,11 +325,11 @@
                              <div class="input-stack">
                                 <div class="input-row">
                                     <label for="transition-weight">Patient Weight (kg):</label>
-                                    <input type="number" id="transition-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                                    <input type="number" id="transition-weight" min="0" max="500" step="0.1" placeholder="e.g., 70" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaTransition();}">
                                 </div>
                                 <div class="input-row">
                                     <label for="transition-current-rate">Current Rate (units/hr):</label>
-                                    <input type="number" id="transition-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0">
+                                    <input type="number" id="transition-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaTransition();}">
                                 </div>
                             </div>
                             <div class="input-group">
@@ -346,11 +346,11 @@
                              <div class="input-stack">
                                 <div class="input-row">
                                     <label for="phase2-current-rate">Current Rate (units/hr):</label>
-                                    <input type="number" id="phase2-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 3.5">
+                                    <input type="number" id="phase2-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 3.5" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaPhase2();}">
                                 </div>
                                 <div class="input-row">
                                     <label for="phase2-current-bg">Current BG (mg/dL):</label>
-                                    <input type="number" id="phase2-current-bg" min="0" max="1500" placeholder="e.g., 180">
+                                    <input type="number" id="phase2-current-bg" min="0" max="1500" placeholder="e.g., 180" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaPhase2();}">
                                 </div>
                             </div>
                             <div class="input-group">
@@ -437,16 +437,16 @@
                          <div class="input-stack">
                              <div class="input-row">
                                  <label for="lbs-input">Pounds (lbs):</label>
-                                 <input type="number" id="lbs-input" placeholder="e.g., 154">
+                                 <input type="number" id="lbs-input" placeholder="e.g., 154" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaBolus();}">
                              </div>
                              <div class="input-row">
                                  <label for="kg-input">Kilograms (kg):</label>
-                                 <input type="number" id="kg-input" placeholder="e.g., 70">
+                                 <input type="number" id="kg-input" placeholder="e.g., 70" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaBolus();}">
                              </div>
                              <hr>
                              <div class="input-row">
                                  <label for="bolus-weight">Patient Weight (kg):</label>
-                                 <input type="number" id="bolus-weight" min="0" max="500" step="0.1" placeholder="e.g., 70">
+                                 <input type="number" id="bolus-weight" min="0" max="500" step="0.1" placeholder="e.g., 70" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaBolus();}">
                              </div>
                          </div>
                          <div class="input-group">
