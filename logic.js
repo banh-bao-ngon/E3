@@ -2,8 +2,7 @@
 console.log('Logic.js script loaded successfully');
 let calculationHistory = [];
 let pendingCalculation = null;
-// Embedded API key for seamless AI functionality
-const EMBEDDED_API_KEY = ''; // Replace with actual API key
+// API key loaded from secure config file (not committed to GitHub)
 
 // Monitoring system variables
 let monitoringData = {
@@ -1139,8 +1138,9 @@ const handleGeminiChat = async () => {
     const userMessage = geminiInput.value.trim();
     if (!userMessage) return;
 
-    if (!EMBEDDED_API_KEY || EMBEDDED_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-        appendMessage('AI service is currently unavailable. Please contact administrator.', 'bot error');
+    // Check if config is loaded and API key is available
+    if (!window.APP_CONFIG || !window.APP_CONFIG.GEMINI_API_KEY || window.APP_CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+        appendMessage('AI service configuration missing. Please check config.js file.', 'bot error');
         return;
     }
 
@@ -1150,7 +1150,7 @@ const handleGeminiChat = async () => {
     const thinkingMessage = appendMessage('Thinking...', 'bot');
 
     try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_API_KEY}`;
+        const apiUrl = `${window.APP_CONFIG.API_ENDPOINT}?key=${window.APP_CONFIG.GEMINI_API_KEY}`;
 
         const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
 
@@ -2056,5 +2056,4 @@ if(geminiSendBtn && geminiInput){
         }
     });
 }
-
 
