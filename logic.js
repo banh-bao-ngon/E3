@@ -2,7 +2,8 @@
 console.log('Logic.js script loaded successfully');
 let calculationHistory = [];
 let pendingCalculation = null;
-let apiKey = localStorage.getItem('gemini_api_key') || '';
+// Embedded API key for seamless AI functionality
+const EMBEDDED_API_KEY = 'AIzaSyAoIyKIQ3iPgSF3Dnb-3aj2oJ7yDxFSK90'; // Replace with actual API key
 
 // Monitoring system variables
 let monitoringData = {
@@ -30,6 +31,9 @@ let monitoringData = {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOMContentLoaded event fired - initializing application');
 
+    // Initialize internal clock and notifications
+    initInternalClock();
+
     // Check disclaimer acceptance
     checkDisclaimer();
     
@@ -39,8 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize dark mode
     initDarkMode();
     
-    // Initialize API key UI
-    initApiKeyUI();
+    // API key UI removed - using embedded key
 
     // Initialize monitoring system
     loadMonitoringData();
@@ -50,7 +53,15 @@ document.addEventListener('DOMContentLoaded', () => {
     updateMonitoringStatus();
 
     // Initialize tracking graph
-    setTimeout(initTrackingGraph, 100);
+    console.log('About to initialize tracking graph...');
+    setTimeout(() => {
+        console.log('Timeout reached, calling initTrackingGraph');
+        try {
+            initTrackingGraph();
+        } catch (error) {
+            console.error('Error initializing tracking graph:', error);
+        }
+    }, 100);
 
     // Initialize data summary
     updateDataSummary();
@@ -60,92 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Tab navigation is now handled by onclick handlers in HTML
 
-    // --- INSULIN PROTOCOL DROPDOWN ---
-    const insulinSelect = document.getElementById('insulin-protocol-select');
-    const nonDkaProtocolDiv = document.getElementById('non-dka-hhs-protocol');
-    const dkaProtocolDiv = document.getElementById('dka-hhs-protocol');
-    const nonDkaSidebar = document.getElementById('non-dka-sidebar');
-    const dkaSidebar = document.getElementById('dka-sidebar');
-
-    if (insulinSelect) {
-        insulinSelect.addEventListener('change', () => {
-            const isDka = insulinSelect.value === 'dka-hhs';
-            nonDkaProtocolDiv.style.display = isDka ? 'none' : 'block';
-            dkaProtocolDiv.style.display = isDka ? 'block' : 'none';
-            nonDkaSidebar.style.display = isDka ? 'none' : 'block';
-            dkaSidebar.style.display = isDka ? 'block' : 'none';
-        });
-    }
+    // Insulin protocol switching now handled by direct onchange handler
     
-    // --- DKA PHASE TABS ---
-    const dkaPhaseTabs = document.querySelector('.dka-phase-tabs');
-    if (dkaPhaseTabs) {
-        const dkaPhaseButtons = dkaPhaseTabs.querySelectorAll('.dka-phase-button');
-        const dkaPhaseContents = document.querySelectorAll('.dka-phase-content');
+    // DKA phase tabs now handled by direct onclick handlers
 
-        dkaPhaseButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const phase = button.dataset.dkaPhase;
-
-                dkaPhaseButtons.forEach(btn => btn.classList.remove('active'));
-                dkaPhaseContents.forEach(content => content.classList.remove('active'));
-
-                button.classList.add('active');
-                document.getElementById(`dka-${phase}-content`).classList.add('active');
-            });
-        });
-    }
-
-    // --- DYNAMIC VISIBILITY FOR PREVIOUS BG INPUT ---
-    const currentBgAdjInput = document.getElementById('current-bg-adj');
-    const previousBgRow = document.getElementById('previous-bg-row');
-    if (currentBgAdjInput && previousBgRow) {
-        currentBgAdjInput.addEventListener('input', () => {
-            const currentBg = parseInt(currentBgAdjInput.value, 10);
-            if (!isNaN(currentBg) && currentBg > 100) {
-                previousBgRow.style.display = 'grid';
-            } else {
-                previousBgRow.style.display = 'none';
-            }
-        });
-    }
+    // Previous BG field visibility now handled by direct oninput handler
     
-    // --- WEIGHT CONVERTER LOGIC ---
-    function setupWeightConverter(lbsId, kgId) {
-        const lbsInput = document.getElementById(lbsId);
-        const kgInput = document.getElementById(kgId);
+    // Weight converter now handled by direct oninput handlers
 
-        if (lbsInput && kgInput) {
-            lbsInput.addEventListener('input', () => {
-                const lbs = parseFloat(lbsInput.value);
-                if (!isNaN(lbs)) {
-                    kgInput.value = (lbs / 2.20462).toFixed(2);
-                } else {
-                    kgInput.value = '';
-                }
-            });
-
-            kgInput.addEventListener('input', () => {
-                const kg = parseFloat(kgInput.value);
-                if (!isNaN(kg)) {
-                    lbsInput.value = (kg * 2.20462).toFixed(2);
-                } else {
-                    lbsInput.value = '';
-                }
-            });
-        }
-    }
-    setupWeightConverter('lbs-input', 'kg-input');
-    setupWeightConverter('other-lbs-input', 'other-kg-input');
-
-    // --- DKA BOLUS CHECKBOX ---
-    const showBolusCheckbox = document.getElementById('show-bolus-calc');
-    const bolusCalculatorContent = document.getElementById('bolus-calculator-content');
-    if(showBolusCheckbox && bolusCalculatorContent) {
-        showBolusCheckbox.addEventListener('change', () => {
-            bolusCalculatorContent.style.display = showBolusCheckbox.checked ? 'block' : 'none';
-        });
-    }
+    // DKA bolus checkbox now handled by direct onchange handler
 
     // Keyboard functionality now handled by direct HTML onkeypress/onkeydown handlers
 });
@@ -170,6 +104,117 @@ function handleGlobalKeydown(event) {
     }
 }
 
+// === WEIGHT CONVERTER FUNCTIONS ===
+// Calculator tab weight converters
+function convertCalcLbsToKg(lbs) {
+    const kgInput = document.getElementById('calc-kg-input');
+
+    if (!isNaN(lbs) && lbs !== '') {
+        const kg = (parseFloat(lbs) / 2.20462).toFixed(2);
+        if (kgInput) kgInput.value = kg;
+    } else {
+        if (kgInput) kgInput.value = '';
+    }
+}
+
+function convertCalcKgToLbs(kg) {
+    const lbsInput = document.getElementById('calc-lbs-input');
+
+    if (!isNaN(kg) && kg !== '') {
+        const lbs = (parseFloat(kg) * 2.20462).toFixed(2);
+        if (lbsInput) lbsInput.value = lbs;
+    } else {
+        if (lbsInput) lbsInput.value = '';
+    }
+}
+
+// DKA weight converters
+function convertLbsToKg(lbs) {
+    const kgInput = document.getElementById('kg-input');
+    const bolusWeightInput = document.getElementById('bolus-weight');
+
+    if (!isNaN(lbs) && lbs !== '') {
+        const kg = (parseFloat(lbs) / 2.20462).toFixed(2);
+        if (kgInput) kgInput.value = kg;
+        if (bolusWeightInput) bolusWeightInput.value = kg;
+    } else {
+        if (kgInput) kgInput.value = '';
+        if (bolusWeightInput) bolusWeightInput.value = '';
+    }
+}
+
+function convertKgToLbs(kg) {
+    const lbsInput = document.getElementById('lbs-input');
+    const bolusWeightInput = document.getElementById('bolus-weight');
+
+    if (!isNaN(kg) && kg !== '') {
+        const lbs = (parseFloat(kg) * 2.20462).toFixed(2);
+        if (lbsInput) lbsInput.value = lbs;
+        if (bolusWeightInput) bolusWeightInput.value = kg;
+    } else {
+        if (lbsInput) lbsInput.value = '';
+        if (bolusWeightInput) bolusWeightInput.value = '';
+    }
+}
+
+// === PREVIOUS BG FIELD TOGGLE ===
+function togglePreviousBgField(currentBg) {
+    const previousBgRow = document.getElementById('previous-bg-row');
+    if (previousBgRow) {
+        const currentBgValue = parseInt(currentBg, 10);
+        if (!isNaN(currentBgValue) && currentBgValue > 100) {
+            previousBgRow.style.display = 'grid';
+        } else {
+            previousBgRow.style.display = 'none';
+        }
+    }
+}
+
+// === DKA BOLUS CALCULATOR TOGGLE ===
+function toggleBolusCalculator(checked) {
+    const bolusCalculatorContent = document.getElementById('bolus-calculator-content');
+    if (bolusCalculatorContent) {
+        bolusCalculatorContent.style.display = checked ? 'block' : 'none';
+    }
+}
+
+// === DKA PHASE SWITCHING ===
+function switchDkaPhase(phase) {
+    const dkaPhaseButtons = document.querySelectorAll('.dka-phase-button');
+    const dkaPhaseContents = document.querySelectorAll('.dka-phase-content');
+
+    // Remove active class from all phase buttons and contents
+    dkaPhaseButtons.forEach(btn => btn.classList.remove('active'));
+    dkaPhaseContents.forEach(content => content.classList.remove('active'));
+
+    // Add active class to clicked phase button
+    const clickedButton = document.querySelector(`[data-dka-phase="${phase}"]`);
+    if (clickedButton) {
+        clickedButton.classList.add('active');
+    }
+
+    // Show corresponding phase content
+    const phaseContent = document.getElementById(`dka-${phase}-content`);
+    if (phaseContent) {
+        phaseContent.classList.add('active');
+    }
+}
+
+// === INSULIN PROTOCOL SWITCHING ===
+function switchInsulinProtocol(value) {
+    const nonDkaProtocolDiv = document.getElementById('non-dka-hhs-protocol');
+    const dkaProtocolDiv = document.getElementById('dka-hhs-protocol');
+    const nonDkaSidebar = document.getElementById('non-dka-sidebar');
+    const dkaSidebar = document.getElementById('dka-sidebar');
+
+    const isDka = value === 'dka-hhs';
+
+    if (nonDkaProtocolDiv) nonDkaProtocolDiv.style.display = isDka ? 'none' : 'block';
+    if (dkaProtocolDiv) dkaProtocolDiv.style.display = isDka ? 'block' : 'none';
+    if (nonDkaSidebar) nonDkaSidebar.style.display = isDka ? 'none' : 'block';
+    if (dkaSidebar) dkaSidebar.style.display = isDka ? 'block' : 'none';
+}
+
 // === TAB NAVIGATION FUNCTION ===
 function switchTab(protocol) {
     console.log('Switching to tab:', protocol);
@@ -191,6 +236,94 @@ function switchTab(protocol) {
     const content = document.getElementById(`${protocol}-protocol-content`);
     if (content) {
         content.classList.add('active');
+    }
+}
+
+// === INTERNAL CLOCK AND NOTIFICATION SYSTEM ===
+
+let clockInterval = null;
+let notificationTimes = [
+    { hour: 11, minute: 0, message: "VS TIME & FINISH HEAD-TO-TOE ASSESSMENT" },
+    { hour: 15, minute: 0, message: "VS TIME & FINISH HEAD-TO-TOE ASSESSMENT" } // 3pm in 24-hour format
+];
+let lastNotificationDate = null;
+
+function initInternalClock() {
+    console.log('Initializing internal clock...');
+
+    // Check notifications every minute
+    clockInterval = setInterval(checkNotifications, 60000);
+
+    // Also check immediately on load
+    checkNotifications();
+}
+
+function checkNotifications() {
+    const now = new Date();
+
+    // Convert to CST (UTC-6, or UTC-5 during DST)
+    const cstOffset = isDaylightSavingTime(now) ? -5 : -6;
+    const cstTime = new Date(now.getTime() + (cstOffset * 60 * 60 * 1000));
+
+    const currentHour = cstTime.getHours();
+    const currentMinute = cstTime.getMinutes();
+    const currentDate = cstTime.toDateString();
+
+    // Check if we've already sent a notification today
+    if (lastNotificationDate === currentDate) {
+        return;
+    }
+
+    // Check for notification times
+    notificationTimes.forEach(time => {
+        if (currentHour === time.hour && currentMinute === time.minute) {
+            showScheduledNotification(time.message);
+            lastNotificationDate = currentDate;
+        }
+    });
+}
+
+function isDaylightSavingTime(date) {
+    // Simple DST check for US (second Sunday in March to first Sunday in November)
+    const year = date.getFullYear();
+    const marchSecondSunday = new Date(year, 2, 14 - new Date(year, 2, 1).getDay());
+    const novemberFirstSunday = new Date(year, 10, 7 - new Date(year, 10, 1).getDay());
+
+    return date >= marchSecondSunday && date < novemberFirstSunday;
+}
+
+function showScheduledNotification(message) {
+    console.log('Showing scheduled notification:', message);
+
+    // Create notification modal
+    const modal = document.createElement('div');
+    modal.className = 'modal active';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>🕐 Scheduled Reminder</h3>
+            <p style="font-size: 1.2rem; font-weight: 600; color: var(--primary-blue); text-align: center; margin: 1rem 0;">
+                ${message}
+            </p>
+            <div class="modal-buttons">
+                <button class="confirm-btn" onclick="closeScheduledNotification(this)">Acknowledged</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Auto-dismiss after 30 seconds if not acknowledged
+    setTimeout(() => {
+        if (document.body.contains(modal)) {
+            closeScheduledNotification(modal.querySelector('.confirm-btn'));
+        }
+    }, 30000);
+}
+
+function closeScheduledNotification(button) {
+    const modal = button.closest('.modal');
+    if (modal && modal.parentNode) {
+        modal.parentNode.removeChild(modal);
     }
 }
 
@@ -417,45 +550,9 @@ function addCompletionIndicator(resultsDiv) {
 }
 
 // API Key management
-function initApiKeyUI() {
-    const setup = document.getElementById('api-key-setup');
-    const chatInterface = document.getElementById('chat-interface');
-    
-    if (apiKey && setup && chatInterface) {
-        setup.style.display = 'none';
-        chatInterface.style.display = 'block';
-    }
-}
+// API key UI initialization removed - using embedded key
 
-function saveApiKey() {
-    const input = document.getElementById('api-key-input');
-    if (input && input.value) {
-        apiKey = input.value;
-        localStorage.setItem('gemini_api_key', apiKey);
-        
-        const setup = document.getElementById('api-key-setup');
-        const chatInterface = document.getElementById('chat-interface');
-        
-        if (setup && chatInterface) {
-            setup.style.display = 'none';
-            chatInterface.style.display = 'block';
-        }
-        
-        input.value = '';
-    } else {
-        alert('Please enter a valid API key');
-    }
-}
-
-function changeApiKey() {
-    const setup = document.getElementById('api-key-setup');
-    const chatInterface = document.getElementById('chat-interface');
-    
-    if (setup && chatInterface) {
-        setup.style.display = 'block';
-        chatInterface.style.display = 'none';
-    }
-}
+// API key management functions removed - using embedded key
 
 // === ORIGINAL CLINICAL CALCULATIONS (PRESERVED EXACTLY) ===
 
@@ -1041,19 +1138,19 @@ const geminiChatBox = document.getElementById('gemini-chat-box');
 const handleGeminiChat = async () => {
     const userMessage = geminiInput.value.trim();
     if (!userMessage) return;
-    
-    if (!apiKey) {
-        appendMessage('Please set up your API key first.', 'bot error');
+
+    if (!EMBEDDED_API_KEY || EMBEDDED_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+        appendMessage('AI service is currently unavailable. Please contact administrator.', 'bot error');
         return;
     }
 
     appendMessage(userMessage, 'user');
     geminiInput.value = '';
-    
+
     const thinkingMessage = appendMessage('Thinking...', 'bot');
 
     try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_API_KEY}`;
 
         const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
 
@@ -1329,6 +1426,11 @@ function loadMonitoringData() {
                 }));
             }
 
+            // Restore timer startTime as Date object
+            if (parsed.timer && parsed.timer.startTime) {
+                parsed.timer.startTime = new Date(parsed.timer.startTime);
+            }
+
             Object.assign(monitoringData, parsed);
         } catch (e) {
             console.error('Error loading monitoring data:', e);
@@ -1375,7 +1477,12 @@ function updateTimerDisplay() {
     if (!timerDisplay) return;
 
     if (monitoringData.timer.isRunning && monitoringData.timer.startTime) {
-        const elapsed = Date.now() - monitoringData.timer.startTime.getTime();
+        // Ensure startTime is a Date object
+        const startTime = monitoringData.timer.startTime instanceof Date
+            ? monitoringData.timer.startTime
+            : new Date(monitoringData.timer.startTime);
+
+        const elapsed = Date.now() - startTime.getTime();
         const remaining = Math.max(0, monitoringData.timer.duration - elapsed);
 
         const minutes = Math.floor(remaining / (60 * 1000));
@@ -1529,10 +1636,21 @@ function updateFlagBadge() {
 let trackingChart = null;
 
 function initTrackingGraph() {
+    console.log('Initializing tracking graph...');
     const canvas = document.getElementById('tracking-chart');
-    if (!canvas) return;
+    if (!canvas) {
+        console.log('Canvas not found!');
+        return;
+    }
+    console.log('Canvas found, creating chart...');
 
     const ctx = canvas.getContext('2d');
+
+    if (typeof Chart === 'undefined') {
+        console.log('Chart.js not loaded!');
+        return;
+    }
+    console.log('Chart.js is available, creating chart instance...');
 
     trackingChart = new Chart(ctx, {
         type: 'line',
@@ -1580,15 +1698,37 @@ function initTrackingGraph() {
 }
 
 function updateGraph() {
-    if (!trackingChart) return;
+    console.log('updateGraph called');
+    if (!trackingChart) {
+        console.log('trackingChart not initialized!');
+        return;
+    }
 
     const graphType = document.getElementById('graph-type-select')?.value || 'bg';
     const timeframe = parseInt(document.getElementById('graph-timeframe-select')?.value || '24');
+    console.log('Graph type:', graphType, 'Timeframe:', timeframe);
 
     const cutoffTime = new Date(Date.now() - timeframe * 60 * 60 * 1000);
 
     // Combine and sort all data points
     const allData = [];
+    console.log('Monitoring data:', monitoringData);
+
+    // Add sample data if no real data exists (for testing)
+    if (monitoringData.dkaHhs.bgReadings.length === 0 && monitoringData.nonDka.bgReadings.length === 0) {
+        console.log('No data available, adding sample data for testing');
+        const now = new Date();
+        allData.push({
+            timestamp: new Date(now.getTime() - 60000), // 1 minute ago
+            bg: 150,
+            type: 'sample'
+        });
+        allData.push({
+            timestamp: now,
+            bg: 160,
+            type: 'sample'
+        });
+    }
 
     // Add DKA/HHS data
     monitoringData.dkaHhs.bgReadings.forEach(reading => {
