@@ -1206,11 +1206,20 @@ h1 {
     transition: all 0.2s;
     border-bottom: 3px solid transparent;
     margin-bottom: -2px;
+    border-radius: 8px 8px 0 0;
 }
 
 .dka-phase-button.active {
     color: var(--primary-red);
     border-bottom-color: var(--primary-red);
+    background: rgba(220, 53, 69, 0.1);
+    border-radius: 8px 8px 0 0;
+}
+
+.dka-phase-button:hover:not(.active) {
+    background: var(--accent-light);
+    border-radius: 8px 8px 0 0;
+    color: var(--text-dark);
 }
 
 .dka-phase-content {
@@ -2044,6 +2053,22 @@ body.dark-mode .data-summary {
     }
 }
 
+/* Dark mode support for DKA phase buttons */
+body.dark-mode .dka-phase-button {
+    color: var(--text-light);
+}
+
+body.dark-mode .dka-phase-button.active {
+    color: #ff8a80;
+    border-bottom-color: #ff8a80;
+    background: rgba(255, 138, 128, 0.15);
+}
+
+body.dark-mode .dka-phase-button:hover:not(.active) {
+    background: var(--accent-light);
+    color: var(--text-dark);
+}
+
 /* Dark mode support for monitoring */
 body.dark-mode .monitoring-panel {
     background: var(--bg-card);
@@ -2336,6 +2361,234 @@ body.dark-mode .calc-display input {
 }
 
 /* === OTHER PROTOCOLS STYLES === */
+
+.drug-protocols-section {
+    margin-bottom: 2rem;
+}
+
+.drug-protocols-section h2 {
+    color: var(--primary-blue);
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.drug-protocols-section .section-subtitle {
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.drug-protocols-table {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.protocols-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-card);
+    min-width: 1200px;
+}
+
+.protocols-table thead {
+    background: var(--gradient-primary);
+    color: var(--cornsilk);
+}
+
+.protocols-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 2px solid var(--border-color);
+}
+
+.protocols-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: top;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.protocols-table tbody tr:hover {
+    background: var(--accent-light);
+}
+
+.protocols-table td strong {
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.protocols-table td em {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.protocol-disclaimer {
+    background: var(--warning-light);
+    border: 1px solid #ffc107;
+    border-radius: 8px;
+    padding: 1rem;
+    color: #856404;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.protocol-disclaimer i {
+    color: #ffc107;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+/* Dark mode support for drug protocols */
+body.dark-mode .protocols-table {
+    background: var(--bg-card);
+}
+
+body.dark-mode .protocols-table thead {
+    background: var(--gradient-primary);
+}
+
+body.dark-mode .protocols-table th {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .protocols-table td {
+    border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .protocols-table tbody tr:hover {
+    background: var(--accent-light);
+}
+
+body.dark-mode .protocols-table td strong {
+    color: #7d8590;
+}
+
+body.dark-mode .protocol-disclaimer {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: rgba(255, 193, 7, 0.3);
+    color: #f0f6fc;
+}
+
+body.dark-mode .protocol-disclaimer i {
+    color: #ffc107;
+}
+
+/* Mobile responsiveness for drug protocols */
+@media (max-width: 1024px) {
+    .drug-protocols-table {
+        overflow-x: visible;
+    }
+
+    .protocols-table {
+        display: none;
+    }
+
+    .protocols-cards {
+        display: block;
+    }
+}
+
+.protocols-cards {
+    display: none;
+}
+
+.protocol-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.protocol-card-header {
+    background: var(--gradient-primary);
+    color: var(--cornsilk);
+    margin: -1rem -1rem 1rem -1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px 10px 0 0;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.protocol-card-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.protocol-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.protocol-field-label {
+    font-weight: 600;
+    color: var(--primary-blue);
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.protocol-field-value {
+    color: var(--text-dark);
+    line-height: 1.4;
+}
+
+.protocol-field-value em {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+/* Wide fields that span both columns */
+.protocol-field.wide {
+    grid-column: span 2;
+}
+
+/* Dark mode support for cards */
+body.dark-mode .protocol-card {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .protocol-field-label {
+    color: #7d8590;
+}
+
+body.dark-mode .protocol-field-value {
+    color: var(--text-dark);
+}
+
+@media (max-width: 768px) {
+    .protocol-card-content {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .protocol-field.wide {
+        grid-column: span 1;
+    }
+
+    .protocol-disclaimer {
+        font-size: 0.8rem;
+        padding: 0.75rem;
+    }
+}
 
 .coming-soon-section {
     background: var(--gradient-primary);
