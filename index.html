@@ -209,7 +209,7 @@
                  <h1>Insulin Protocol</h1>
                  <div class="input-group">
                      <label for="insulin-protocol-select">Select Protocol:</label>
-                     <select id="insulin-protocol-select">
+                     <select id="insulin-protocol-select" onchange="switchInsulinProtocol(this.value)">
                          <option value="non-dka-hhs">Non-DKA/HHS Insulin Drip</option>
                          <option value="dka-hhs">DKA/HHS Insulin Drip</option>
                      </select>
@@ -247,11 +247,11 @@
                              </div>
                              <div class="input-row" id="previous-bg-row" style="display: none;">
                                  <label for="previous-bg">Previous BG (mg/dL):</label>
-                                 <input type="number" id="previous-bg" min="0" max="1500" placeholder="e.g., 250">
+                                 <input type="number" id="previous-bg" min="0" max="1500" placeholder="e.g., 250" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateInsulinAdjustment();}">
                              </div>
                              <div class="input-row">
                                  <label for="current-bg-adj">Current BG (mg/dL):</label>
-                                 <input type="number" id="current-bg-adj" min="0" max="1500" placeholder="e.g., 210" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateInsulinAdjustment();}">
+                                 <input type="number" id="current-bg-adj" min="0" max="1500" placeholder="e.g., 210" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateInsulinAdjustment();}" oninput="togglePreviousBgField(this.value)">
                              </div>
                              <div class="input-checkbox-row">
                                 <label for="type-1-dm">Type 1 DM:</label>
@@ -268,9 +268,9 @@
                  <!-- DKA/HHS PROTOCOL (Initially Hidden) -->
                  <div id="dka-hhs-protocol" style="display: none;">
                     <div class="dka-phase-tabs">
-                        <button class="dka-phase-button active" data-dka-phase="phase1">Phase 1</button>
-                        <button class="dka-phase-button" data-dka-phase="transition">Transition Phase</button>
-                        <button class="dka-phase-button" data-dka-phase="phase2">Phase 2</button>
+                        <button class="dka-phase-button active" data-dka-phase="phase1" onclick="switchDkaPhase('phase1')">Phase 1</button>
+                        <button class="dka-phase-button" data-dka-phase="transition" onclick="switchDkaPhase('transition')">Transition Phase</button>
+                        <button class="dka-phase-button" data-dka-phase="phase2" onclick="switchDkaPhase('phase2')">Phase 2</button>
                     </div>
                     <div class="input-group">
                         <a href="Insulin_DKA-HHS_032019.pdf" download>Download Protocol PDF</a>
@@ -430,18 +430,18 @@
                      <h3>Bolus (if ordered)</h3>
                      <div class="input-checkbox-row" style="justify-content: center; margin-bottom: 1rem;">
                          <label for="show-bolus-calc">Calculate Bolus?</label>
-                         <input type="checkbox" id="show-bolus-calc" class="align-checkbox">
+                         <input type="checkbox" id="show-bolus-calc" class="align-checkbox" onchange="toggleBolusCalculator(this.checked)">
                      </div>
                      <div id="bolus-calculator-content" style="display: none;">
                          <p class="section-subtitle">Calculates Regular insulin at 0.1 units/kg (Max 10 units) and includes a weight converter.</p>
                          <div class="input-stack">
                              <div class="input-row">
                                  <label for="lbs-input">Pounds (lbs):</label>
-                                 <input type="number" id="lbs-input" placeholder="e.g., 154" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaBolus();}">
+                                 <input type="number" id="lbs-input" placeholder="e.g., 154" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaBolus();}" oninput="convertLbsToKg(this.value)">
                              </div>
                              <div class="input-row">
                                  <label for="kg-input">Kilograms (kg):</label>
-                                 <input type="number" id="kg-input" placeholder="e.g., 70" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaBolus();}">
+                                 <input type="number" id="kg-input" placeholder="e.g., 70" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaBolus();}" oninput="convertKgToLbs(this.value)">
                              </div>
                              <hr>
                              <div class="input-row">
@@ -470,14 +470,14 @@
                          <div class="weight-converter">
                              <div class="input-group">
                                  <label for="calc-lbs-input">Pounds (lbs):</label>
-                                 <input type="number" id="calc-lbs-input" placeholder="Enter weight in pounds" step="0.1">
+                                 <input type="number" id="calc-lbs-input" placeholder="Enter weight in pounds" step="0.1" oninput="convertCalcLbsToKg(this.value)">
                              </div>
                              <div class="conversion-arrow">
                                  <i class="fas fa-exchange-alt"></i>
                              </div>
                              <div class="input-group">
                                  <label for="calc-kg-input">Kilograms (kg):</label>
-                                 <input type="number" id="calc-kg-input" placeholder="Enter weight in kilograms" step="0.1">
+                                 <input type="number" id="calc-kg-input" placeholder="Enter weight in kilograms" step="0.1" oninput="convertCalcKgToLbs(this.value)">
                              </div>
                          </div>
                      </div>
@@ -528,20 +528,9 @@
                     <p><strong>Important:</strong> This AI assistant is for supplementary information only. It does not replace clinical judgment or professional medical advice. Always verify information independently.</p>
                 </div>
                 
-                <!-- API Key Setup -->
-                <div id="api-key-setup" class="api-key-setup">
-                    <h3>Setup AI Assistant</h3>
-                    <p>Enter your API key to enable the AI assistant:</p>
-                    <div class="api-key-input-group">
-                        <input type="password" id="api-key-input" placeholder="Enter your Gemini API key">
-                        <button onclick="saveApiKey()">Save Key</button>
-                    </div>
-                    <p class="api-key-help">
-                        <a href="https://makersuite.google.com/app/apikey" target="_blank">Get your API key from Google AI Studio</a>
-                    </p>
-                </div>
+                <!-- AI Assistant is now ready to use with embedded key -->
 
-                <div id="chat-interface" class="chat-interface" style="display: none;">
+                <div id="chat-interface" class="chat-interface" style="display: block;">
                     <div class="chat-container">
                         <div class="chat-box" id="gemini-chat-box">
                             <div class="chat-message bot-message">
@@ -552,7 +541,6 @@
                             <input type="text" id="gemini-input" placeholder="Ask a clinical question..." onkeypress="if(event.key==='Enter'){event.preventDefault();handleGeminiChat();}">
                             <button id="gemini-send-btn"><i class="fas fa-paper-plane"></i></button>
                         </div>
-                        <button onclick="changeApiKey()" class="change-key-btn">Change API Key</button>
                     </div>
                 </div>
             </div>
