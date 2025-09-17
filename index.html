@@ -1130,13 +1130,34 @@
  <script>
      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
  </script>
- <script defer src="https://cdn.vercel-insights.com/v1/script.debug.js"></script>
+ <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 
  <!-- Vercel Speed Insights -->
  <script>
      window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
  </script>
- <script defer src="https://cdn.vercel-insights.com/v1/speed-insights/script.debug.js"></script>
+ <script defer src="https://cdn.vercel-insights.com/v1/speed-insights/script.js"></script>
+
+ <!-- Analytics Test -->
+ <script>
+   // Test analytics after page load
+   window.addEventListener('load', function() {
+     setTimeout(function() {
+       if (window.va) {
+         console.log('✅ Vercel Analytics loaded');
+         window.va('track', 'pageview');
+       } else {
+         console.log('❌ Vercel Analytics not loaded');
+       }
+
+       if (window.si) {
+         console.log('✅ Speed Insights loaded');
+       } else {
+         console.log('❌ Speed Insights not loaded');
+       }
+     }, 2000);
+   });
+ </script>
  <!-- Service Worker temporarily disabled for debugging -->
  <!--
  <script>
