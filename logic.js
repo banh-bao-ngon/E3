@@ -3,7 +3,7 @@ console.log('Logic.js script loaded successfully');
 let calculationHistory = [];
 let pendingCalculation = null;
 // Embedded API key for seamless AI functionality
-const EMBEDDED_API_KEY = 'AIzaSyAoIyKIQ3iPgSF3Dnb-3aj2oJ7yDxFSK90'; // Replace with actual API key
+const EMBEDDED_API_KEY = ''; // Replace with actual API key
 
 // Monitoring system variables
 let monitoringData = {
@@ -2056,4 +2056,5 @@ if(geminiSendBtn && geminiInput){
         }
     });
 }
+
 
