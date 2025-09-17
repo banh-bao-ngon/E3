@@ -1335,79 +1335,224 @@ h1 {
 @media (max-width: 992px) {
     .main-wrapper {
         padding-top: 70px;
+        padding-left: 10px;
+        padding-right: 10px;
+        box-sizing: border-box;
     }
-    
+
     .protocol-content.active {
         flex-direction: column;
-        padding: 1.5rem;
+        padding: 1rem;
+        box-sizing: border-box;
     }
-    
+
     .lab-monitoring-section {
         width: 100%;
         margin-top: 2rem;
+        padding: 1rem;
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow-x: hidden;
     }
-    
+
     .input-row {
         grid-template-columns: 1fr;
+        width: 100%;
+        box-sizing: border-box;
     }
-    
+
     .input-row label, .input-checkbox-row label {
         text-align: left;
         margin-bottom: 0.5rem;
     }
-    
+
     .result-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
     }
-    
+
     .history-panel {
         width: 100%;
         right: -100%;
     }
-    
+
     .modal-content {
-        margin: 20px;
+        margin: 10px;
+        max-width: calc(100% - 20px);
+        box-sizing: border-box;
     }
-    
+
     .tabs {
         gap: 5px;
+        flex-wrap: wrap;
+        padding: 0 10px;
+        box-sizing: border-box;
     }
-    
+
     .tab-button {
-        padding: 0.6rem 1.2rem;
-        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+        flex: 1;
+        min-width: 120px;
+        max-width: 150px;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .lab-monitoring-content ul {
+        padding-left: 15px;
+        margin-right: 0;
+        box-sizing: border-box;
+    }
+
+    .lab-monitoring-content li {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        padding-right: 0;
+        box-sizing: border-box;
     }
 }
 
 @media (max-width: 640px) {
     body {
         padding: 10px;
+        margin: 0;
+        box-sizing: border-box;
     }
-    
+
     h1 {
         font-size: 1.8rem;
+        padding: 0 10px;
     }
-    
+
+    .main-wrapper {
+        padding: 10px;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
     .input-group {
         flex-direction: column;
         gap: 0.8rem;
+        padding: 0;
+        margin: 1rem 0;
+        width: 100%;
+        box-sizing: border-box;
     }
-    
+
     .input-group input, .input-group select {
         width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+        margin: 0;
     }
-    
+
     .input-group button {
         width: 100%;
+        box-sizing: border-box;
+        margin: 0;
     }
-    
-    .dark-mode-toggle, .history-toggle, .feedback-toggle {
+
+    .input-stack {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .input-row input, .input-stack input {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+    .tab-content {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .protocol-content.active {
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .container {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .dark-mode-toggle, .history-toggle, .feedback-toggle, .monitoring-toggle {
         width: 40px;
         height: 40px;
     }
-    
-    .dark-mode-toggle i, .history-toggle i, .feedback-toggle i {
+
+    .dark-mode-toggle i, .history-toggle i, .feedback-toggle i, .monitoring-toggle i {
         font-size: 16px;
+    }
+
+    /* Mobile-specific improvements */
+    .results-container {
+        padding: 0;
+        margin-top: 1rem;
+        box-sizing: border-box;
+    }
+
+    .result-item {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .calculation-timestamp {
+        position: static;
+        display: block;
+        text-align: right;
+        margin-top: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* DKA Phase tabs mobile optimization */
+    .dka-phase-tabs {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        justify-content: center;
+        padding: 0 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .dka-phase-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
+        border-radius: 6px 6px 0 0;
+    }
+
+    /* Calculator mobile improvements */
+    .calc-section {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .calc-section h2 {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    /* Footer mobile optimization */
+    .site-footer {
+        padding: 1rem;
+        font-size: 0.8rem;
+        text-align: center;
     }
 }
 
@@ -2094,20 +2239,57 @@ body.dark-mode .notification {
     }
 
     .monitoring-toggle {
-        top: 120px;
+        top: 15px;
         right: 10px;
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
+        z-index: 2000;
+    }
+
+    .dark-mode-toggle {
+        top: 65px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        z-index: 2000;
+    }
+
+    .history-toggle {
+        top: 115px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        z-index: 2000;
+    }
+
+    .feedback-toggle {
+        top: 165px;
+        right: 10px;
+        width: 40px;
+        height: 40px;
+        z-index: 2000;
     }
 
     #notification-container {
         right: 10px;
         left: 10px;
         max-width: none;
+        top: 10px;
     }
 
     .timer-display {
         font-size: 2rem;
+    }
+
+    /* Stack floating buttons vertically with proper spacing */
+    .floating-buttons-stack {
+        position: fixed;
+        top: 15px;
+        right: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        z-index: 2000;
     }
 }
 
@@ -2575,18 +2757,71 @@ body.dark-mode .protocol-field-value {
 }
 
 @media (max-width: 768px) {
+    .drug-protocols-section {
+        margin: 1rem 0;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+
+    .drug-protocols-section h2 {
+        font-size: 1.3rem;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .drug-protocols-section .section-subtitle {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        padding: 0 10px;
+    }
+
+    .protocol-card {
+        margin: 0 0 1rem 0;
+        padding: 1rem;
+        box-sizing: border-box;
+    }
+
+    .protocol-card-header {
+        margin: -1rem -1rem 1rem -1rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        text-align: center;
+    }
+
     .protocol-card-content {
         grid-template-columns: 1fr;
-        gap: 0.5rem;
+        gap: 0.75rem;
     }
 
     .protocol-field.wide {
         grid-column: span 1;
     }
 
+    .protocol-field-label {
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .protocol-field-value {
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+
     .protocol-disclaimer {
         font-size: 0.8rem;
         padding: 0.75rem;
+        margin: 1rem 10px 0 10px;
+        box-sizing: border-box;
+    }
+
+    .protocols-table {
+        min-width: auto;
+    }
+
+    .drug-protocols-table {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 }
 
