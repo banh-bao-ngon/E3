@@ -1,163 +1,123 @@
+# Clinical Protocols Calculator
 
-  🏥 Clinical Protocols
+A comprehensive web-based clinical calculator for healthcare professionals with automated monitoring, scheduled notifications, and AI assistance.
 
-  Heparin Protocol
+## 🚀 Live Demo
+[Visit the live website](https://your-vercel-app.vercel.app) *(Replace with your actual Vercel URL)*
 
-  - aPTT value input with Enter key support
-  - Automatic dose adjustment calculations
-  - Critical value flagging with pulsating red alerts
-  - PDF protocol download
-  - Real-time monitoring integration
+## ✨ Features
 
-  Insulin Protocols
+- **Clinical Protocols**: Heparin and Insulin protocols with automated calculations
+- **Real-time Monitoring**: Blood glucose and infusion rate tracking with visual graphs
+- **Scheduled Notifications**: Automatic reminders at 11 AM and 3 PM CST
+- **AI Assistant**: Clinical question answering with Gemini AI
+- **Calculator Tools**: Weight converter and basic calculator
+- **Dark Mode**: Professional dark theme option
 
-  - Non-DKA/HHS Protocol:
-    - Initial infusion rate calculation
-    - Rate adjustment based on current/previous BG
-    - Type 1 DM considerations
-    - Dynamic previous BG field (appears when current BG > 100)
-  - DKA/HHS Protocol:
-    - Phase 1: Initiation & Continuation
-    - Transition Phase
-    - Phase 2: Maintenance
-    - Bolus calculator with weight converter
-    - Phase navigation with tabs
+## 🛠️ Local Development Setup
 
-  📊 Monitoring & Alerts System
+### Prerequisites
+- A Gemini AI API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
-  Real-time Tracking
+### Quick Start
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/clinical-protocols-calculator.git
+   cd clinical-protocols-calculator
+   ```
 
-  - Blood glucose trend monitoring
-  - Infusion rate tracking
-  - Interactive Chart.js graphs with multiple views
-  - 6/12/24 hour timeframe selection
-  - Data point visualization over time
+2. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
 
-  Clinical Flagging
+3. **Edit `.env` and add your API key:**
+   ```
+   VITE_GEMINI_API_KEY=your_actual_api_key_here
+   ```
 
-  - DKA/HHS Flags: BG > 250 for 2+ hrs, rate < 2.0 for 4+ hrs
-  - Non-DKA Flags: Stable BG 100-180 for 6+ hrs
-  - Visual flag badges with notifications
-  - Automatic provider alerts
+4. **Open `index.html` in your browser**
 
-  Timer System
+## 🚀 Vercel Deployment
 
-  - 1-hour countdown timer
-  - Start/reset/stop controls
-  - Visual progress indication
-  - Integration with monitoring workflow
+### Automatic Deployment (Recommended)
+1. **Fork this repository** to your GitHub account
 
-  🕐 Scheduled Notifications
+2. **Connect to Vercel:**
+   - Go to [Vercel Dashboard](https://vercel.com/dashboard)
+   - Click "New Project"
+   - Import your GitHub repository
 
-  - Internal clock with CST time zone handling
-  - Automatic alerts at 11 AM and 3 PM CST
-  - "VS TIME & FINISH HEAD-TO-TOE ASSESSMENT" reminders
-  - Modal popup notifications
-  - Auto-dismiss after 30 seconds
+3. **Set Environment Variables:**
+   - In Vercel project settings → Environment Variables
+   - Add: `VITE_GEMINI_API_KEY` = `your_actual_api_key_here`
+   - Environment: All (Production, Preview, Development)
 
-  🧮 Calculator Tools
+4. **Deploy!**
+   - Vercel will automatically deploy on every push to main branch
 
-  Weight Converter
+### Manual Deployment
+```bash
+# Install Vercel CLI
+npm i -g vercel
 
-  - Pounds ↔ Kilograms conversion
-  - Real-time calculation as you type
-  - Integration with DKA bolus calculations
+# Deploy
+vercel
 
-  Basic Calculator
+# Set environment variable
+vercel env add VITE_GEMINI_API_KEY
+```
 
-  - Color-coded buttons:
-    - Gray: Numbers (0-9, .)
-    - Orange: Operators (+, -, ×, ÷)
-    - Red: Clear functions (C, CE)
-    - Green: Equals (=)
-  - Standard arithmetic operations
-  - Clear entry and clear all functions
+## 🔒 Security Features
 
-  🤖 AI Assistant (Dat AI)
+- **Environment Variables**: API keys stored securely in Vercel
+- **No Keys in Code**: All sensitive data handled via environment variables
+- **Auto HTTPS**: Vercel provides automatic SSL certificates
+- **Security Headers**: XSS protection and content security policies
 
-  - Embedded API key (no user setup required)
-  - Clinical question answering
-  - Medical protocol guidance
-  - Drug interaction information
-  - Disclaimer: Supplementary use only
-  - Chat interface with message history
+## 📱 Usage
 
-  📱 User Interface Features
+### Clinical Protocols
+- **Heparin Protocol**: Enter aPTT values for dose calculations
+- **Insulin Protocol**: Choose between Non-DKA and DKA/HHS protocols
 
-  Navigation
+### Monitoring System
+- **Real-time Graphs**: Track blood glucose and infusion rates
+- **Automated Flags**: Get alerts for critical values
+- **Timer System**: 1-hour countdown for regular monitoring
 
-  - Tab-based protocol switching
-  - Floating action buttons (dark mode, history, monitoring, feedback)
-  - Smooth tab transitions
-  - Keyboard navigation (Enter/Escape keys)
+### AI Assistant
+- Ask clinical questions in the "Dat AI Assistant" tab
+- Get evidence-based responses for protocols and calculations
+- **Important**: Always verify AI responses with clinical judgment
 
-  Dark Mode
+## 🔧 Contributing
 
-  - True dark theme with deep black/gray backgrounds
-  - Consistent color scheme across all elements
-  - High contrast text for readability
-  - Theme persistence
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Make your changes
+4. Test locally with your `.env` file
+5. Commit: `git commit -m "Add feature"`
+6. Push: `git push origin feature-name`
+7. Create a Pull Request
 
-  Data Management
+## ⚠️ Important Notes
 
-  - Calculation History: Track all calculations with timestamps
-  - Data Export: Clear individual or all tracking data
-  - Local Storage: Persistent data between sessions
-  - Selective Clearing: Remove specific data types
+- **Clinical Use**: This tool is for reference only - always use clinical judgment
+- **API Key Security**: Never commit your `.env` file to version control
+- **Environment Variables**: Use Vercel dashboard to manage production API keys
+- **HIPAA Compliance**: No patient data is stored or transmitted
 
-  🎨 Visual Features
+## 📞 Support
 
-  Color-Coded Results
+- **Issues**: Report bugs via GitHub Issues
+- **Questions**: Use GitHub Discussions
+- **Security**: Email security@yourproject.com for vulnerabilities
 
-  - Green: Therapeutic/good values
-  - Yellow: Warning values
-  - Red: Critical values (with pulsating background)
-  - Consistent theming in light and dark modes
+## 📄 License
 
-  Responsive Design
+© 2025 BANH BAO - Developed, tested, and overseen by Banh Bao
 
-  - Mobile-friendly interface
-  - Touch-optimized buttons
-  - Adaptive layouts
-  - Progressive Web App (PWA) ready
+---
 
-  Status Indicators
-
-  - Completion checkmarks
-  - Critical value animations
-  - Progress indicators
-  - Flag badges
-
-  ⚡ Technical Features
-
-  Real-time Updates
-
-  - Live data synchronization
-  - Automatic graph updates
-  - Dynamic form validation
-  - Instant calculations
-
-  Error Handling
-
-  - Input validation
-  - Graceful error messages
-  - Fallback mechanisms
-  - Debug logging
-
-  Performance
-
-  - Chart.js integration
-  - Efficient data processing
-  - Smooth animations
-  - Fast load times
-
-  🔒 Safety Features
-
-  - Clinical disclaimers
-  - Critical value alerts
-  - Verification prompts
-  - Professional use warnings
-  - Color-coded urgency levels
-
-  This comprehensive clinical calculator provides healthcare professionals with automated calculations, real-time
-  monitoring, scheduled reminders, and AI assistance—all designed for safe, efficient patient care! 🚀
+**Disclaimer**: This tool is for clinical reference only. Always use clinical judgment and verify calculations independently.
