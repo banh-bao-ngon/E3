@@ -2240,34 +2240,38 @@ body.dark-mode .notification {
 
     .monitoring-toggle {
         top: 15px;
-        right: 10px;
+        right: 15px;
         width: 40px;
         height: 40px;
         z-index: 2000;
+        position: fixed;
     }
 
     .dark-mode-toggle {
         top: 65px;
-        right: 10px;
+        right: 15px;
         width: 40px;
         height: 40px;
         z-index: 2000;
+        position: fixed;
     }
 
     .history-toggle {
         top: 115px;
-        right: 10px;
+        right: 15px;
         width: 40px;
         height: 40px;
         z-index: 2000;
+        position: fixed;
     }
 
     .feedback-toggle {
         top: 165px;
-        right: 10px;
+        right: 15px;
         width: 40px;
         height: 40px;
         z-index: 2000;
+        position: fixed;
     }
 
     #notification-container {
@@ -2520,25 +2524,91 @@ body.dark-mode .calc-display input {
 
 /* Mobile responsiveness for calculator */
 @media (max-width: 768px) {
+    .calculator-sections {
+        padding: 0 10px;
+        margin: 0;
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+
     .weight-converter {
         grid-template-columns: 1fr;
         gap: 1rem;
         text-align: center;
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    .weight-converter .input-group {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    .weight-converter input {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        margin: 0;
     }
 
     .conversion-arrow {
         transform: rotate(90deg);
+        margin: 10px auto;
     }
 
     .basic-calculator {
-        max-width: none;
+        max-width: 100%;
         width: 100%;
+        margin: 0;
+        padding: 0.75rem;
+        box-sizing: border-box;
+        background: var(--light-grey);
+        border-radius: 12px;
+    }
+
+    .calc-display {
+        margin-bottom: 0.75rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .calc-display input {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        padding: 0.75rem;
+        font-size: 1.2rem;
+    }
+
+    .calc-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.4rem;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .calc-btn {
-        padding: 0.75rem;
-        font-size: 1rem;
-        min-height: 45px;
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .calc-zero {
+        grid-column: span 2;
+    }
+
+    .calc-equals {
+        grid-row: span 2;
     }
 }
 
@@ -2667,18 +2737,32 @@ body.dark-mode .protocol-disclaimer i {
     color: #ffc107;
 }
 
-/* Mobile responsiveness for drug protocols */
+/* Tablet and mobile responsiveness for drug protocols */
 @media (max-width: 1024px) {
     .drug-protocols-table {
         overflow-x: visible;
     }
 
     .protocols-table {
-        display: none;
+        display: none !important;
     }
 
     .protocols-cards {
-        display: block;
+        display: block !important;
+    }
+}
+
+/* Additional mobile-specific optimizations */
+@media (max-width: 768px) {
+    .drug-protocols-section {
+        margin: 1rem 0;
+        padding: 0 10px;
+        box-sizing: border-box;
+    }
+
+    .protocol-card-content {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
     }
 }
 
@@ -2779,6 +2863,8 @@ body.dark-mode .protocol-field-value {
         margin: 0 0 1rem 0;
         padding: 1rem;
         box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
     }
 
     .protocol-card-header {
@@ -2816,12 +2902,17 @@ body.dark-mode .protocol-field-value {
 
     .protocols-table {
         min-width: auto;
+        display: none !important;
     }
 
     .drug-protocols-table {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+    }
+
+    .protocols-cards {
+        display: block !important;
     }
 }
 
