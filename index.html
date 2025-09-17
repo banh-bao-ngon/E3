@@ -551,26 +551,501 @@
              <div class="container">
                  <h1>Other Protocols</h1>
 
-                 <div class="coming-soon-section">
-                     <div class="coming-soon-content">
-                         <i class="fas fa-clock fa-3x"></i>
-                         <h2>Additional Protocols Coming Soon</h2>
-                         <p>This section will be updated with additional clinical protocols and tools to support healthcare providers.</p>
+                 <div class="drug-protocols-section">
+                     <h2><i class="fas fa-pills"></i> Critical Care Drug Protocols</h2>
+                     <p class="section-subtitle">Reference guide for common critical care medications with dosing, monitoring, and side effects.</p>
 
-                         <div class="planned-features">
-                             <h3>Planned Features:</h3>
-                             <ul>
-                                 <li><i class="fas fa-heart"></i> Cardiac Protocols</li>
-                                 <li><i class="fas fa-lungs"></i> Respiratory Protocols</li>
-                                 <li><i class="fas fa-prescription-bottle-alt"></i> Medication Dosing Guidelines</li>
-                                 <li><i class="fas fa-chart-pie"></i> Laboratory Reference Ranges</li>
-                                 <li><i class="fas fa-file-medical"></i> Emergency Protocols</li>
-                             </ul>
+                     <div class="drug-protocols-table">
+                         <table class="protocols-table">
+                             <thead>
+                                 <tr>
+                                     <th>Drug</th>
+                                     <th>Class</th>
+                                     <th>Bolus</th>
+                                     <th>Titration</th>
+                                     <th>PCU Max</th>
+                                     <th>Vitals</th>
+                                     <th>Side Effects</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 <tr>
+                                     <td><strong>Amiodarone</strong></td>
+                                     <td>Class III Anti-Arrhythmic K+ channel blocker</td>
+                                     <td>150 mg over 10 minutes</td>
+                                     <td>1st 6 hours: 1mg/min<br>Maintenance dose: 0.5mg/min</td>
+                                     <td>-</td>
+                                     <td>q1hr</td>
+                                     <td>↑ QTC, ↓ BP, ↓ HR<br>Heart blocks, lethargy, edema</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Bumetanide (Bumex)</strong></td>
+                                     <td>Loop Diuretic</td>
+                                     <td>IV push per provider preference</td>
+                                     <td>Initial: 0.5 - 1 mg/hour<br>Per provider orders on dose change</td>
+                                     <td>-</td>
+                                     <td>q2hr</td>
+                                     <td>↓BP, ↓Na+, ↓K+, ↓Cl-, ↓Ca+, ↓Mg+, ↓uric acid<br>Headache, NVD, dizziness, gout, cramps, pruritus</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Diltiazem (Cardizem)</strong></td>
+                                     <td>Ca+ Channel Blocker<br>Anti-Arrhythmic</td>
+                                     <td>0.25 - 0.35 mg/kg over 2 min</td>
+                                     <td>Titration: 2.5 mg/hr every 15 mins or per provider orders</td>
+                                     <td>15 mg/hr</td>
+                                     <td>q1hr, unless titrating</td>
+                                     <td>↓BP, ↓HR<br>Heartblocks, sinus pauses, headache, NV, edema, flushing</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Dobutamine (Dobutrex)</strong><br><em>*Central line preferred or rotate sites q12-24 hrs</em></td>
+                                     <td>+ Inotrope</td>
+                                     <td>N/A</td>
+                                     <td>Titration: 2.5 mcg/kg/min every 10 mins (per orders)</td>
+                                     <td>10 mcg/kg/min</td>
+                                     <td>q1hr, unless titrating</td>
+                                     <td>↑HR, ↑BP, ↑ectopy, ↓ K+<br>Headache, N, dyspnea</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Dopamine</strong><br><em>*Central line preferred or rotate sites q12-24 hrs</em></td>
+                                     <td>+ Inotrope<br>Vasopressor</td>
+                                     <td>N/A</td>
+                                     <td>Titration: 2.5 mcg/kg/min every 10 mins (per orders)</td>
+                                     <td>10 mcg/kg/min</td>
+                                     <td>q1hr, unless titrating</td>
+                                     <td>Low dose: ↑GFR, ↑Na+ excretion<br>Mod dose: ↑contractility, ↑CO ↑HR<br>Headache, NV, palpitations, chest pain</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Esmolol (Brevibloc)</strong><br><em>*Central line preferred or rotate sites q12-24 hrs</em></td>
+                                     <td>Beta-adrenergic blocking agent</td>
+                                     <td>N/A</td>
+                                     <td>Titration: 25 - 50 mcg/kg/min every 5 mins per orders</td>
+                                     <td>200 mcg/kg/min</td>
+                                     <td>q1hr, unless titrating</td>
+                                     <td>↓BP, ↓HR, ↑K+<br>Dizziness, syncope, arrhythmias</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Furosemide (Lasix)</strong></td>
+                                     <td>Loop Diuretic</td>
+                                     <td>IV push per provider preference</td>
+                                     <td>Per MD orders on dose change</td>
+                                     <td>-</td>
+                                     <td>q2hr</td>
+                                     <td>↓BP, ↓Na+, ↓K+, ↓Cl-, ↓Mg+, ↓Ca+<br>Blurred vision, NVD, dizziness, paresthesia, muscle spasms</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Heparin</strong></td>
+                                     <td>Anti-coagulant</td>
+                                     <td>Per protocol/provider orders</td>
+                                     <td>Per protocol<br><em>*Either Cardiology or VTE*</em></td>
+                                     <td>-</td>
+                                     <td>Per Protocol</td>
+                                     <td>↓platelets, ↓HGb, ↓Hct<br>Bleeding (hematuria, tarry stools)</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Insulin (Humulin R)</strong><br><em>*Low-sorb tubing</em></td>
+                                     <td>Anti-diabetic agent</td>
+                                     <td>Per protocol/provider orders</td>
+                                     <td>Per protocol<br><em>*Either DKA or Non-DKA/HHS*</em></td>
+                                     <td>-</td>
+                                     <td>Per Protocol</td>
+                                     <td>↓K+, ↓BG<br>NVD<br><em>K+ must be > 3.3 prior to initiating infusion</em></td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Milrinone</strong></td>
+                                     <td>+ Inotrope<br>PDE Inhibitor<br>Vasodilator</td>
+                                     <td>-</td>
+                                     <td><em>*Dose change per cardiology or ICU provider*</em></td>
+                                     <td>0.75 mcg/kg/min</td>
+                                     <td>q1hr x 24 hrs, then q2hrs w/ provider approval</td>
+                                     <td>↓BP, ↓K+<br>Arrhythmias, fatigue, headache</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Nicardipine (Cardene)</strong></td>
+                                     <td>Ca+ Channel Blocker<br>Anti-Hypertensive</td>
+                                     <td>N/A</td>
+                                     <td>Titrate: 2.5 mg/hr every 15 mins per orders</td>
+                                     <td>15 mg/hr</td>
+                                     <td>q1hr, unless titrating</td>
+                                     <td>↓BP, ↑HR<br>Headache, NV, heartblocks</td>
+                                 </tr>
+                                 <tr>
+                                     <td><strong>Nitroglycerin (Tridil)</strong><br><em>*Low-sorb tubing*</em></td>
+                                     <td>Anti-anginal<br>Anti-hypertensive<br>Vasodilator</td>
+                                     <td>N/A</td>
+                                     <td>Titration: 5 mcg/min every 5 mins per orders</td>
+                                     <td>200 mcg/min</td>
+                                     <td>q1hr, unless titrating</td>
+                                     <td>↓ BP ↓HR<br>Headaches, dizziness, NV, hypovolemia, tingling of mouth, vision disturbances</td>
+                                 </tr>
+                             </tbody>
+                         </table>
+                     </div>
+
+                     <!-- Card layout for mobile/tablet -->
+                     <div class="protocols-cards">
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Amiodarone</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Class III Anti-Arrhythmic K+ channel blocker</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">150 mg over 10 minutes</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">1st 6 hours: 1mg/min<br>Maintenance dose: 0.5mg/min</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q1hr</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↑ QTC, ↓ BP, ↓ HR<br>Heart blocks, lethargy, edema</div>
+                                 </div>
+                             </div>
                          </div>
 
-                         <div class="update-notice">
-                             <p><strong>Note:</strong> Content updates will be implemented based on clinical needs and user feedback.</p>
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Bumetanide (Bumex)</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Loop Diuretic</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">IV push per provider preference</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Initial: 0.5 - 1 mg/hour<br>Per provider orders on dose change</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q2hr</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓BP, ↓Na+, ↓K+, ↓Cl-, ↓Ca+, ↓Mg+, ↓uric acid<br>Headache, NVD, dizziness, gout, cramps, pruritus</div>
+                                 </div>
+                             </div>
                          </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Diltiazem (Cardizem)</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Ca+ Channel Blocker<br>Anti-Arrhythmic</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">0.25 - 0.35 mg/kg over 2 min</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Titration: 2.5 mg/hr every 15 mins or per provider orders</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">PCU Max</div>
+                                     <div class="protocol-field-value">15 mg/hr</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q1hr, unless titrating</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓BP, ↓HR<br>Heartblocks, sinus pauses, headache, NV, edema, flushing</div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Dobutamine (Dobutrex)</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">+ Inotrope</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">N/A</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Titration: 2.5 mcg/kg/min every 10 mins (per orders)</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">PCU Max</div>
+                                     <div class="protocol-field-value">10 mcg/kg/min</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q1hr, unless titrating</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↑HR, ↑BP, ↑ectopy, ↓ K+<br>Headache, N, dyspnea</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Special Notes</div>
+                                     <div class="protocol-field-value"><em>*Central line preferred or rotate sites q12-24 hrs</em></div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Dopamine</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">+ Inotrope<br>Vasopressor</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">N/A</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Titration: 2.5 mcg/kg/min every 10 mins (per orders)</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">PCU Max</div>
+                                     <div class="protocol-field-value">10 mcg/kg/min</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q1hr, unless titrating</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">Low dose: ↑GFR, ↑Na+ excretion<br>Mod dose: ↑contractility, ↑CO ↑HR<br>Headache, NV, palpitations, chest pain</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Special Notes</div>
+                                     <div class="protocol-field-value"><em>*Central line preferred or rotate sites q12-24 hrs</em></div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Esmolol (Brevibloc)</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Beta-adrenergic blocking agent</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">N/A</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Titration: 25 - 50 mcg/kg/min every 5 mins per orders</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">PCU Max</div>
+                                     <div class="protocol-field-value">200 mcg/kg/min</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q1hr, unless titrating</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓BP, ↓HR, ↑K+<br>Dizziness, syncope, arrhythmias</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Special Notes</div>
+                                     <div class="protocol-field-value"><em>*Central line preferred or rotate sites q12-24 hrs</em></div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Furosemide (Lasix)</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Loop Diuretic</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">IV push per provider preference</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Per MD orders on dose change</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q2hr</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓BP, ↓Na+, ↓K+, ↓Cl-, ↓Mg+, ↓Ca+<br>Blurred vision, NVD, dizziness, paresthesia, muscle spasms</div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Heparin</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Anti-coagulant</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">Per protocol/provider orders</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Per protocol<br><em>*Either Cardiology or VTE*</em></div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">Per Protocol</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓platelets, ↓HGb, ↓Hct<br>Bleeding (hematuria, tarry stools)</div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Insulin (Humulin R)</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Anti-diabetic agent</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">Per protocol/provider orders</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Per protocol<br><em>*Either DKA or Non-DKA/HHS*</em></div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">Per Protocol</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓K+, ↓BG<br>NVD<br><em>K+ must be > 3.3 prior to initiating infusion</em></div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Special Notes</div>
+                                     <div class="protocol-field-value"><em>*Low-sorb tubing</em></div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Milrinone</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">+ Inotrope<br>PDE Inhibitor<br>Vasodilator</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">-</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value"><em>*Dose change per cardiology or ICU provider*</em></div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">PCU Max</div>
+                                     <div class="protocol-field-value">0.75 mcg/kg/min</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q1hr x 24 hrs, then q2hrs w/ provider approval</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓BP, ↓K+<br>Arrhythmias, fatigue, headache</div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Nicardipine (Cardene)</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Ca+ Channel Blocker<br>Anti-Hypertensive</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">N/A</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Titrate: 2.5 mg/hr every 15 mins per orders</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">PCU Max</div>
+                                     <div class="protocol-field-value">15 mg/hr</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q1hr, unless titrating</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓BP, ↑HR<br>Headache, NV, heartblocks</div>
+                                 </div>
+                             </div>
+                         </div>
+
+                         <div class="protocol-card">
+                             <div class="protocol-card-header">Nitroglycerin (Tridil)</div>
+                             <div class="protocol-card-content">
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Class</div>
+                                     <div class="protocol-field-value">Anti-anginal<br>Anti-hypertensive<br>Vasodilator</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Bolus</div>
+                                     <div class="protocol-field-value">N/A</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Titration</div>
+                                     <div class="protocol-field-value">Titration: 5 mcg/min every 5 mins per orders</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">PCU Max</div>
+                                     <div class="protocol-field-value">200 mcg/min</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Vitals</div>
+                                     <div class="protocol-field-value">q1hr, unless titrating</div>
+                                 </div>
+                                 <div class="protocol-field">
+                                     <div class="protocol-field-label">Side Effects</div>
+                                     <div class="protocol-field-value">↓ BP ↓HR<br>Headaches, dizziness, NV, hypovolemia, tingling of mouth, vision disturbances</div>
+                                 </div>
+                                 <div class="protocol-field wide">
+                                     <div class="protocol-field-label">Special Notes</div>
+                                     <div class="protocol-field-value"><em>*Low-sorb tubing*</em></div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+
+                     <div class="protocol-disclaimer">
+                         <p><i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong> These protocols are for reference only. Always follow your institution's specific protocols and provider orders. Verify all dosages and contraindications before administration.</p>
                      </div>
                  </div>
 
@@ -650,6 +1125,18 @@
 </footer>
 
  <script src="./logic.js"></script>
+
+ <!-- Vercel Analytics -->
+ <script>
+     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+ </script>
+ <script defer src="https://cdn.vercel-insights.com/v1/script.debug.js"></script>
+
+ <!-- Vercel Speed Insights -->
+ <script>
+     window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+ </script>
+ <script defer src="https://cdn.vercel-insights.com/v1/speed-insights/script.debug.js"></script>
  <!-- Service Worker temporarily disabled for debugging -->
  <!--
  <script>
