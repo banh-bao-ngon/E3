@@ -1324,7 +1324,7 @@ const handleGeminiChat = async () => {
     const thinkingMessage = appendMessage('Thinking...', 'bot');
 
     try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${EMBEDDED_API_KEY}`;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${EMBEDDED_API_KEY}`;
 
         const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. When given a drug name, give me concise nursing information about [drug name], including its indications, common side effects, and when the patient should report to the doctor. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
 
