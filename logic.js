@@ -52,7 +52,17 @@ document.addEventListener('DOMContentLoaded', () => {
     updateFlagsDisplay();
     updateTimerDisplay();
     updateTimerControls();
+
+    // Initialize data summary
+    updateDataSummary();
     updateMonitoringStatus();
+
+    // Update timer display every minute to keep target time current
+    setInterval(() => {
+        if (!monitoringData.timer.isRunning && !monitoringData.timer.startTime) {
+            updateTimerDisplay();
+        }
+    }, 60000); // Update every minute
 
     // Initialize tracking graph
     console.log('About to initialize tracking graph...');
@@ -234,10 +244,26 @@ function switchTab(protocol) {
         clickedTab.classList.add('active');
     }
 
-    // Show corresponding content
-    const content = document.getElementById(`${protocol}-protocol-content`);
+    // Show corresponding content - handle different naming patterns
+    let contentId;
+    if (protocol === 'history' || protocol === 'monitoring' || protocol === 'settings') {
+        contentId = `${protocol}-content`;
+    } else {
+        contentId = `${protocol}-protocol-content`;
+    }
+
+    const content = document.getElementById(contentId);
     if (content) {
         content.classList.add('active');
+    }
+
+    // Update page functions for specific tabs
+    if (protocol === 'history') {
+        updateHistoryDisplay();
+    } else if (protocol === 'monitoring') {
+        updateMonitoringDisplay();
+    } else if (protocol === 'settings') {
+        updateSettingsDisplay();
     }
 }
 
@@ -355,27 +381,149 @@ function initDarkMode() {
     const isDark = localStorage.getItem('dark_mode') === 'true';
     if (isDark) {
         document.body.classList.add('dark-mode');
-        updateDarkModeIcon();
     }
+    updateDarkModeToggle();
 }
 
 function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('dark_mode', isDark);
-    updateDarkModeIcon();
+    updateDarkModeToggle();
 }
 
-function updateDarkModeIcon() {
-    const btn = document.getElementById('dark-mode-toggle');
-    if (btn) {
-        const icon = btn.querySelector('i');
-        if (document.body.classList.contains('dark-mode')) {
-            icon.className = 'fas fa-sun';
-        } else {
-            icon.className = 'fas fa-moon';
-        }
+function updateDarkModeToggle() {
+    const footerCheckbox = document.getElementById('dark-mode-toggle');
+    const settingsCheckbox = document.getElementById('dark-mode-setting');
+    const isDark = document.body.classList.contains('dark-mode');
+
+    if (footerCheckbox) {
+        footerCheckbox.checked = isDark;
     }
+    if (settingsCheckbox) {
+        settingsCheckbox.checked = isDark;
+    }
+}
+
+// Additional utility functions for new tabs
+function clearMonitoringData() {
+    monitoringData.activeFlags = [];
+    monitoringData.dkaHhs = { bgReadings: [], infusionRates: [] };
+    monitoringData.nonDka = { bgReadings: [], infusionRates: [] };
+    updateMonitoringDisplay();
+    localStorage.removeItem('monitoring_data');
+    updateDataSummary();
+}
+
+function clearAllData() {
+    clearHistory();
+    clearMonitoringData();
+    localStorage.clear();
+    // Reload to reset everything
+    location.reload();
+}
+
+function updateDataSummary() {
+    const summaryElement = document.getElementById('data-summary-text');
+    if (!summaryElement) return;
+
+    // Count calculation history
+    const historyCount = calculationHistory.length;
+
+    // Count monitoring data
+    const dkaBgCount = monitoringData.dkaHhs.bgReadings.length;
+    const dkaRateCount = monitoringData.dkaHhs.infusionRates.length;
+    const nonDkaBgCount = monitoringData.nonDka.bgReadings.length;
+    const nonDkaRateCount = monitoringData.nonDka.infusionRates.length;
+    const totalMonitoringReadings = dkaBgCount + dkaRateCount + nonDkaBgCount + nonDkaRateCount;
+
+    // Count active flags
+    const activeFlagsCount = monitoringData.activeFlags.length;
+
+    // Check for other stored data
+    const apiKeyStored = localStorage.getItem('gemini_api_key') ? 1 : 0;
+    const disclaimerAccepted = localStorage.getItem('disclaimer_accepted') ? 1 : 0;
+
+    const totalDataPoints = historyCount + totalMonitoringReadings + activeFlagsCount + apiKeyStored + disclaimerAccepted;
+
+    if (totalDataPoints === 0) {
+        summaryElement.textContent = 'No stored data';
+        summaryElement.className = 'data-summary-empty';
+    } else {
+        const parts = [];
+        if (historyCount > 0) {
+            parts.push(`${historyCount} calculation${historyCount === 1 ? '' : 's'}`);
+        }
+        if (totalMonitoringReadings > 0) {
+            parts.push(`${totalMonitoringReadings} monitoring reading${totalMonitoringReadings === 1 ? '' : 's'}`);
+        }
+        if (activeFlagsCount > 0) {
+            parts.push(`${activeFlagsCount} active flag${activeFlagsCount === 1 ? '' : 's'}`);
+        }
+        if (apiKeyStored > 0) {
+            parts.push('API key');
+        }
+        if (disclaimerAccepted > 0) {
+            parts.push('preferences');
+        }
+
+        summaryElement.textContent = parts.join(', ');
+        summaryElement.className = 'data-summary-active';
+    }
+}
+
+// Helper functions for new tabs
+function updateHistoryDisplay() {
+    const historyDisplay = document.getElementById('history-display');
+    if (historyDisplay && calculationHistory.length > 0) {
+        historyDisplay.innerHTML = '';
+        calculationHistory.forEach(item => {
+            const historyItem = document.createElement('div');
+            historyItem.className = `history-item ${item.critical ? 'critical' : ''}`;
+            historyItem.innerHTML = `
+                <div class="history-timestamp">${item.timestamp}</div>
+                <div class="history-protocol">${item.protocol}</div>
+                <div class="history-details">${item.details}</div>
+            `;
+            historyDisplay.appendChild(historyItem);
+        });
+    }
+}
+
+function updateMonitoringDisplay() {
+    // Update monitoring data when tab is opened
+    const activeCalc = document.getElementById('active-calculations');
+    const criticalFlags = document.getElementById('critical-flags');
+
+    if (activeCalc) activeCalc.textContent = calculationHistory.length;
+    if (criticalFlags) criticalFlags.textContent = monitoringData.activeFlags.length;
+
+    // Update timer display
+    updateTimerDisplay();
+    updateTimerControls();
+
+    // Initialize or update the tracking graph if on monitoring tab
+    if (document.getElementById('tracking-chart')) {
+        // Add a small delay to ensure the DOM is ready
+        setTimeout(() => {
+            if (!trackingChart) {
+                initTrackingGraph();
+            } else {
+                updateGraph();
+            }
+        }, 100);
+    }
+}
+
+function updateSettingsDisplay() {
+    // Sync dark mode toggle in settings with current state
+    const darkModeToggle = document.getElementById('dark-mode-setting');
+    if (darkModeToggle) {
+        darkModeToggle.checked = document.body.classList.contains('dark-mode');
+    }
+
+    // Update data summary
+    updateDataSummary();
 }
 
 // History management
@@ -383,6 +531,14 @@ function loadHistory() {
     const saved = localStorage.getItem('calculation_history');
     if (saved) {
         calculationHistory = JSON.parse(saved);
+        // Clean up any truncated history entries
+        calculationHistory = calculationHistory.map(item => {
+            if (item.result && item.result.endsWith('...')) {
+                // Remove truncation markers
+                item.result = item.result.replace(/\.\.\.+$/, '');
+            }
+            return item;
+        });
         updateHistoryDisplay();
     }
 }
@@ -390,6 +546,7 @@ function loadHistory() {
 function saveHistory() {
     localStorage.setItem('calculation_history', JSON.stringify(calculationHistory));
     updateHistoryDisplay();
+    updateDataSummary();
 }
 
 function addToHistory(protocol, inputs, result, isCritical = false) {
@@ -399,39 +556,53 @@ function addToHistory(protocol, inputs, result, isCritical = false) {
         protocol,
         inputs,
         result,
-        isCritical
+        details: formatHistoryDetails(inputs, result),
+        critical: isCritical
     };
-    
+
     calculationHistory.unshift(entry);
     if (calculationHistory.length > 50) {
         calculationHistory = calculationHistory.slice(0, 50);
     }
-    
+
     saveHistory();
 }
 
+function formatHistoryDetails(inputs, result) {
+    // Remove any existing truncation markers and expand the text
+    const cleanResult = result ? result.replace(/\.\.\.+$/, '').trim() : '';
+    return `Inputs: ${inputs}\nResult: ${cleanResult}`;
+}
+
 function updateHistoryDisplay() {
-    const content = document.getElementById('history-content');
-    const count = document.getElementById('history-count');
-    
-    if (count) {
-        count.textContent = calculationHistory.length;
-    }
-    
-    if (content) {
+    const historyDisplay = document.getElementById('history-display');
+
+    if (historyDisplay) {
         if (calculationHistory.length === 0) {
-            content.innerHTML = '<p class="history-empty">No calculations yet</p>';
-        } else {
-            content.innerHTML = calculationHistory.map(entry => `
-                <div class="history-item ${entry.isCritical ? 'critical' : ''}">
-                    <div class="history-timestamp">${entry.timestamp}</div>
-                    <div class="history-protocol">${entry.protocol}</div>
-                    <div class="history-details">
-                        <strong>Input:</strong> ${entry.inputs}<br>
-                        <strong>Result:</strong> ${entry.result}
-                    </div>
+            historyDisplay.innerHTML = `
+                <div class="history-empty">
+                    <i class="fas fa-history"></i>
+                    <p>No calculations performed yet.</p>
                 </div>
-            `).join('');
+            `;
+        } else {
+            historyDisplay.innerHTML = '';
+            calculationHistory.forEach(item => {
+                const historyItem = document.createElement('div');
+                // Handle both old format (isCritical) and new format (critical)
+                const isCritical = item.critical || item.isCritical || false;
+                historyItem.className = `history-item ${isCritical ? 'critical' : ''}`;
+
+                // Handle both old and new data formats
+                const details = item.details || formatHistoryDetails(item.inputs || '', item.result || '');
+
+                historyItem.innerHTML = `
+                    <div class="history-timestamp">${item.timestamp || 'Unknown time'}</div>
+                    <div class="history-protocol">${item.protocol || 'Unknown protocol'}</div>
+                    <div class="history-details">${details}</div>
+                `;
+                historyDisplay.appendChild(historyItem);
+            });
         }
     }
 }
@@ -447,6 +618,7 @@ function clearHistory() {
     if (confirm('Are you sure you want to clear all calculation history?')) {
         calculationHistory = [];
         saveHistory();
+        updateDataSummary();
     }
 }
 
@@ -699,9 +871,9 @@ function performInsulinRateCalculation(bg, resultsDiv) {
     }
 
     const cautionsHtml = `
-        <div class="result-item result-critical" style="text-align: left; margin-top: 1rem;">
-            <h4 style="color: black; margin-top: 0; margin-bottom: 0.5rem;">Cautions:</h4>
-            <ul style="padding-left: 20px; margin: 0; color: black; list-style-position: inside;">
+        <div class="result-item result-critical cautions-section" style="text-align: left; margin-top: 1rem;">
+            <h4 class="cautions-title">Cautions:</h4>
+            <ul class="cautions-list">
                 <li>Caution with elderly, CKD and low body weight individuals.</li>
                 <li>Caution with BG > 600 mg/dL (starting dose may be too high).</li>
                 <li>Notify provider if insulin infusion rate is > 20 units/hour.</li>
@@ -933,7 +1105,7 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
     addToHistory(
         'Non-DKA Insulin Adjustment',
         inputStr,
-        adjustment.replace(/<[^>]*>/g, '').substring(0, 50) + '...',
+        adjustment.replace(/<[^>]*>/g, ''),
         currentBg <= 70 || currentBg > 400
     );
 
@@ -1154,7 +1326,7 @@ const handleGeminiChat = async () => {
     try {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${EMBEDDED_API_KEY}`;
 
-        const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
+        const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. When given a drug name, give me concise nursing information about [drug name], including its indications, common side effects, and when the patient should report to the doctor. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
 
         const payload = {
             contents: [{ 
@@ -1445,7 +1617,10 @@ function loadMonitoringData() {
 function startTimer() {
     if (monitoringData.timer.isRunning) return;
 
-    monitoringData.timer.startTime = new Date();
+    // Only set start time if this is a fresh start (not resuming)
+    if (!monitoringData.timer.startTime) {
+        monitoringData.timer.startTime = new Date();
+    }
     monitoringData.timer.isRunning = true;
 
     monitoringData.timer.intervalId = setInterval(() => {
@@ -1461,7 +1636,7 @@ function stopTimer() {
 
     clearInterval(monitoringData.timer.intervalId);
     monitoringData.timer.isRunning = false;
-    monitoringData.timer.startTime = null;
+    // Don't reset startTime - keep it for pause functionality
 
     updateTimerDisplay();
     updateTimerControls();
@@ -1469,16 +1644,18 @@ function stopTimer() {
 
 function resetTimer() {
     stopTimer();
+    monitoringData.timer.startTime = null;
     updateTimerDisplay();
+    updateTimerControls();
 }
 
 function updateTimerDisplay() {
     const timerDisplay = document.getElementById('timer-display');
-    const targetTimeDisplay = document.getElementById('target-time-display');
+    const targetTimeDisplay = document.querySelector('.target-time');
 
     if (!timerDisplay) return;
 
-    if (monitoringData.timer.isRunning && monitoringData.timer.startTime) {
+    if (monitoringData.timer.startTime) {
         // Ensure startTime is a Date object
         const startTime = monitoringData.timer.startTime instanceof Date
             ? monitoringData.timer.startTime
@@ -1497,7 +1674,7 @@ function updateTimerDisplay() {
             targetTimeDisplay.textContent = `Target: ${targetTime.toLocaleTimeString()}`;
         }
 
-        if (remaining === 0) {
+        if (remaining === 0 && monitoringData.timer.isRunning) {
             stopTimer();
             showNotification('Timer completed! Time for next assessment.', 'info');
         }
@@ -1646,6 +1823,13 @@ function initTrackingGraph() {
     }
     console.log('Canvas found, creating chart...');
 
+    // Destroy existing chart if it exists
+    if (trackingChart) {
+        console.log('Destroying existing chart...');
+        trackingChart.destroy();
+        trackingChart = null;
+    }
+
     const ctx = canvas.getContext('2d');
 
     if (typeof Chart === 'undefined') {
@@ -1699,15 +1883,41 @@ function initTrackingGraph() {
     updateGraph();
 }
 
+function updateTrackingGraph() {
+    console.log('updateTrackingGraph called - dropdown value changed');
+    // Force the browser to update the dropdown values
+    const graphTypeSelect = document.getElementById('graph-type-select');
+    const timeframeSelect = document.getElementById('graph-timeframe-select');
+
+    if (graphTypeSelect) {
+        console.log('Current graph type selection:', graphTypeSelect.value);
+    }
+    if (timeframeSelect) {
+        console.log('Current timeframe selection:', timeframeSelect.value);
+    }
+
+    // Add a small delay to ensure the dropdown value has been updated
+    setTimeout(() => {
+        updateGraph();
+    }, 50);
+}
+
 function updateGraph() {
     console.log('updateGraph called');
     if (!trackingChart) {
-        console.log('trackingChart not initialized!');
+        console.log('trackingChart not initialized! Initializing now...');
+        initTrackingGraph();
         return;
     }
 
-    const graphType = document.getElementById('graph-type-select')?.value || 'bg';
-    const timeframe = parseInt(document.getElementById('graph-timeframe-select')?.value || '24');
+    const graphTypeSelect = document.getElementById('graph-type-select');
+    const timeframeSelect = document.getElementById('graph-timeframe-select');
+
+    console.log('Graph type select element:', graphTypeSelect);
+    console.log('Timeframe select element:', timeframeSelect);
+
+    const graphType = graphTypeSelect?.value || 'bg';
+    const timeframe = parseInt(timeframeSelect?.value || '24');
     console.log('Graph type:', graphType, 'Timeframe:', timeframe);
 
     const cutoffTime = new Date(Date.now() - timeframe * 60 * 60 * 1000);
@@ -1846,9 +2056,14 @@ function updateGraph() {
         };
     }
 
+    console.log('Updating chart with:', { labels: labels.length, datasets: datasets.length });
+    console.log('Datasets:', datasets);
+
     trackingChart.data.labels = labels;
     trackingChart.data.datasets = datasets;
     trackingChart.update();
+
+    console.log('Chart updated successfully');
 }
 
 function clearTrackingData(type) {
@@ -2058,4 +2273,72 @@ if(geminiSendBtn && geminiInput){
         }
     });
 }
+
+// === DISCHARGE CHECKLIST FUNCTIONALITY ===
+function initDischargeChecklist() {
+    const checkboxes = document.querySelectorAll('.checklist-checkbox');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateDischargeProgress);
+    });
+
+    updateDischargeProgress();
+}
+
+function updateDischargeProgress() {
+    const checkboxes = document.querySelectorAll('.checklist-checkbox');
+    const checked = document.querySelectorAll('.checklist-checkbox:checked');
+
+    const totalItems = checkboxes.length;
+    const completedItems = checked.length;
+    const percentage = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+    const progressFill = document.getElementById('discharge-progress-fill');
+    const progressText = document.getElementById('discharge-progress-text');
+
+    if (progressFill) {
+        progressFill.style.width = percentage + '%';
+    }
+
+    if (progressText) {
+        progressText.textContent = `${completedItems} of ${totalItems} items completed (${percentage}%)`;
+    }
+
+    // Save progress to localStorage
+    const checkboxStates = {};
+    checkboxes.forEach(checkbox => {
+        checkboxStates[checkbox.id] = checkbox.checked;
+    });
+
+    localStorage.setItem('dischargeChecklistState', JSON.stringify(checkboxStates));
+}
+
+function loadDischargeChecklistState() {
+    const savedState = localStorage.getItem('dischargeChecklistState');
+
+    if (savedState) {
+        try {
+            const checkboxStates = JSON.parse(savedState);
+
+            Object.keys(checkboxStates).forEach(checkboxId => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.checked = checkboxStates[checkboxId];
+                }
+            });
+
+            updateDischargeProgress();
+        } catch (error) {
+            console.error('Error loading discharge checklist state:', error);
+        }
+    }
+}
+
+// Initialize discharge checklist when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        initDischargeChecklist();
+        loadDischargeChecklistState();
+    }, 100);
+});
 
