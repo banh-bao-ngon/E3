@@ -28,122 +28,12 @@
     <button onclick="acceptDisclaimer()" class="accept-btn">I Understand</button>
 </div>
 
-<!-- Dark Mode Toggle -->
-<button id="dark-mode-toggle" class="dark-mode-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
-    <i class="fas fa-moon"></i>
-</button>
-
-<!-- History Panel Toggle -->
-<button id="history-toggle" class="history-toggle" onclick="toggleHistory()" title="Calculation History">
-    <i class="fas fa-history"></i>
-    <span class="history-count" id="history-count">0</span>
-</button>
 
 <!-- Feedback Button -->
 <button id="feedback-toggle" class="feedback-toggle" onclick="toggleFeedback()" title="Leave Feedback">
     <i class="fas fa-comment-dots"></i>
 </button>
 
-<!-- Monitoring Panel Toggle -->
-<button id="monitoring-toggle" class="monitoring-toggle" onclick="toggleMonitoringPanel()" title="Monitoring & Alerts">
-    <i class="fas fa-chart-line"></i>
-    <span class="flag-badge" id="flag-badge" style="display: none;"></span>
-</button>
-
-<div id="history-panel" class="history-panel">
-    <div class="history-header">
-        <h3>Calculation History</h3>
-        <div>
-            <button onclick="clearHistory()" class="clear-history-btn" title="Clear All History">Clear All</button>
-            <button onclick="toggleHistory()" class="close-history-btn" title="Close Panel">&times;</button>
-        </div>
-    </div>
-    <div id="history-content" class="history-content">
-        <p class="history-empty">No calculations yet</p>
-    </div>
-</div>
-
-<!-- Monitoring Panel -->
-<div id="monitoring-panel" class="monitoring-panel">
-    <div class="monitoring-header">
-        <h3>Clinical Monitoring</h3>
-        <button onclick="toggleMonitoringPanel()" class="close-monitoring-btn" title="Close Panel">&times;</button>
-    </div>
-
-    <!-- Timer Section -->
-    <div class="monitoring-section">
-        <h4><i class="fas fa-clock"></i> Assessment Timer</h4>
-        <div class="timer-controls">
-            <div class="timer-display-container">
-                <div id="timer-display" class="timer-display">60:00</div>
-                <div id="target-time-display" class="target-time">Target: --:--:--</div>
-            </div>
-            <div class="timer-buttons">
-                <button id="timer-start-btn" onclick="startTimer()" class="timer-btn timer-start">Start</button>
-                <button id="timer-stop-btn" onclick="stopTimer()" class="timer-btn timer-stop" disabled>Stop</button>
-                <button id="timer-reset-btn" onclick="resetTimer()" class="timer-btn timer-reset">Reset</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Monitoring Status -->
-    <div class="monitoring-section">
-        <h4><i class="fas fa-chart-bar"></i> Status</h4>
-        <div id="monitoring-status" class="monitoring-status">
-            <div class="status-item">
-                <span class="status-label">Total Readings:</span>
-                <span class="status-value">0</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">Active Flags:</span>
-                <span class="status-value">0</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">Timer:</span>
-                <span class="status-value">Stopped</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tracking Graph -->
-    <div class="monitoring-section">
-        <h4><i class="fas fa-chart-line"></i> Tracking Data</h4>
-        <div class="graph-controls">
-            <select id="graph-type-select" onchange="updateGraph()">
-                <option value="bg">Blood Glucose</option>
-                <option value="rate">Infusion Rate</option>
-                <option value="both">Both</option>
-            </select>
-            <select id="graph-timeframe-select" onchange="updateGraph()">
-                <option value="6">Last 6 Hours</option>
-                <option value="12">Last 12 Hours</option>
-                <option value="24">Last 24 Hours</option>
-            </select>
-        </div>
-        <div class="graph-container">
-            <canvas id="tracking-chart" width="350" height="200"></canvas>
-        </div>
-        <div class="data-management">
-            <h5><i class="fas fa-trash-alt"></i> Data Management</h5>
-            <div class="data-clear-buttons">
-                <button onclick="clearTrackingData('bg')" class="clear-btn clear-bg">Clear BG Data</button>
-                <button onclick="clearTrackingData('rates')" class="clear-btn clear-rates">Clear Rate Data</button>
-                <button onclick="clearTrackingData('all')" class="clear-btn clear-all">Clear All Data</button>
-            </div>
-            <div class="data-summary">
-                <span id="data-summary-text">Loading data summary...</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Active Flags -->
-    <div class="monitoring-section">
-        <h4><i class="fas fa-exclamation-triangle"></i> Active Alerts</h4>
-        <div id="flags-container" class="flags-container">
-            <p class="no-flags">No active alerts</p>
-        </div>
-    </div>
-</div>
 
  <div class="main-wrapper">
      <div class="tabs">
@@ -151,7 +41,11 @@
          <button class="tab-button" data-protocol="insulin" onclick="switchTab('insulin')">Insulin Protocol</button>
          <button class="tab-button" data-protocol="calculator" onclick="switchTab('calculator')">Calculator</button>
          <button class="tab-button" data-protocol="gemini-ai" onclick="switchTab('gemini-ai')">Dat AI Assistant</button>
+         <button class="tab-button" data-protocol="discharge" onclick="switchTab('discharge')">Discharge Checklist</button>
          <button class="tab-button" data-protocol="other" onclick="switchTab('other')">Other Protocols</button>
+         <button class="tab-button" data-protocol="history" onclick="switchTab('history')">History</button>
+         <button class="tab-button" data-protocol="monitoring" onclick="switchTab('monitoring')">Monitoring</button>
+         <button class="tab-button" data-protocol="settings" onclick="switchTab('settings')">Settings</button>
      </div>
 
      <div class="tab-content">
@@ -527,7 +421,7 @@
                     <i class="fas fa-info-circle"></i>
                     <p><strong>Important:</strong> This AI assistant is for supplementary information only. It does not replace clinical judgment or professional medical advice. Always verify information independently.</p>
                 </div>
-                
+
                 <!-- AI Assistant is now ready to use with embedded key -->
 
                 <div id="chat-interface" class="chat-interface" style="display: block;">
@@ -541,6 +435,144 @@
                             <input type="text" id="gemini-input" placeholder="Ask a clinical question..." onkeypress="if(event.key==='Enter'){event.preventDefault();handleGeminiChat();}">
                             <button id="gemini-send-btn"><i class="fas fa-paper-plane"></i></button>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discharge Checklist Tab -->
+        <div id="discharge-protocol-content" class="protocol-content">
+            <div class="container">
+                <h1><i class="fas fa-clipboard-check"></i> Discharge Checklist</h1>
+
+                <div class="discharge-sections">
+                    <!-- Patient Section -->
+                    <div class="discharge-section">
+                        <h2><i class="fas fa-user"></i> Patient</h2>
+                        <div class="checklist-items">
+                            <div class="checklist-item">
+                                <input type="checkbox" id="remove-pivs" class="checklist-checkbox">
+                                <label for="remove-pivs">Remove all PIVs & cardiac monitor</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="gather-belongings" class="checklist-checkbox">
+                                <label for="gather-belongings">Gather all belongings</label>
+                            </div>
+                            <div class="sub-items">
+                                <div class="checklist-item sub-item">
+                                    <input type="checkbox" id="belongings-closet" class="checklist-checkbox">
+                                    <label for="belongings-closet">Belongings closet</label>
+                                </div>
+                                <div class="checklist-item sub-item">
+                                    <input type="checkbox" id="meds-to-bed" class="checklist-checkbox">
+                                    <label for="meds-to-bed">Meds to Bed</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EPIC Section -->
+                    <div class="discharge-section">
+                        <h2><i class="fas fa-desktop"></i> EPIC</h2>
+                        <div class="checklist-items">
+                            <div class="checklist-item">
+                                <input type="checkbox" id="education-resolve" class="checklist-checkbox">
+                                <label for="education-resolve">Education → Resolve "Patient discharged"</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="care-plan-initial" class="checklist-checkbox">
+                                <label for="care-plan-initial">Care plan → Initial care plan with "Progressing and [goal]"</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="care-plan-discharge" class="checklist-checkbox">
+                                <label for="care-plan-discharge">Care plan → Add "Adequate for Discharge"</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="navigators-discharge" class="checklist-checkbox">
+                                <label for="navigators-discharge">Navigators → "Discharge" tab on the top bar</label>
+                            </div>
+                            <div class="sub-items">
+                                <div class="checklist-item sub-item">
+                                    <input type="checkbox" id="discharge-instructions" class="checklist-checkbox">
+                                    <label for="discharge-instructions">Discharge instructions: add relevant information</label>
+                                </div>
+                                <div class="checklist-item sub-item">
+                                    <input type="checkbox" id="followup-checklist" class="checklist-checkbox">
+                                    <label for="followup-checklist">Follow-up checklist: schedule follow-up appointment ("Schedule one click" with outpatient JPS)</label>
+                                </div>
+                                <div class="checklist-item sub-item">
+                                    <input type="checkbox" id="print-avs" class="checklist-checkbox">
+                                    <label for="print-avs">Print AVS</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education Section -->
+                    <div class="discharge-section">
+                        <h2><i class="fas fa-graduation-cap"></i> Education</h2>
+                        <div class="checklist-items">
+                            <div class="checklist-item">
+                                <input type="checkbox" id="teach-discharge" class="checklist-checkbox">
+                                <label for="teach-discharge">Teach discharge info on the AVS (meds, follow-up appts, etc.)</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="discharge-note" class="checklist-checkbox">
+                                <label for="discharge-note">Write discharge note (significant event) using ".discharge", adjust relevant patient information</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Facility Discharge Section -->
+                    <div class="discharge-section facility-discharge">
+                        <h2><i class="fas fa-building"></i> If Discharge to Facility</h2>
+                        <div class="checklist-items">
+                            <div class="checklist-item">
+                                <input type="checkbox" id="call-facility" class="checklist-checkbox">
+                                <label for="call-facility">Call report to facility</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="call-transport" class="checklist-checkbox">
+                                <label for="call-transport">Call transport</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="clerk-packet" class="checklist-checkbox">
+                                <label for="clerk-packet">Have unit clerk make packet</label>
+                            </div>
+                            <div class="checklist-item">
+                                <input type="checkbox" id="ltact-mot" class="checklist-checkbox">
+                                <label for="ltact-mot">If transferring to LTACT, TL will fill out MOT</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Help Section -->
+                    <div class="discharge-section help-section">
+                        <h2><i class="fas fa-phone"></i> When Need Help</h2>
+                        <div class="help-info">
+                            <p><strong>Call discharge holding lounge:</strong></p>
+                            <div class="phone-numbers">
+                                <div class="phone-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>23904</span>
+                                </div>
+                                <div class="phone-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>23905</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Indicator -->
+                <div class="discharge-progress">
+                    <h3>Progress</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="discharge-progress-fill"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="discharge-progress-text">0 of 15 items completed (0%)</span>
                     </div>
                 </div>
             </div>
@@ -1081,7 +1113,128 @@
                  </div>
              </div>
          </div>
-         
+
+         <!-- History Tab -->
+         <div id="history-content" class="protocol-content">
+             <div class="container">
+                 <h1>Calculation History</h1>
+                 <div class="history-content-wrapper">
+                     <div class="history-header">
+                         <h3>Recent Calculations</h3>
+                         <button class="clear-history-btn" onclick="clearHistory()">Clear All History</button>
+                     </div>
+                     <div class="history-content" id="history-display">
+                         <div class="history-empty">
+                             <i class="fas fa-history"></i>
+                             <p>No calculations performed yet.</p>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Monitoring Tab -->
+         <div id="monitoring-content" class="protocol-content">
+             <div class="container">
+                 <h1>Patient Monitoring</h1>
+                 <div class="monitoring-content-wrapper">
+                     <!-- Timer Section -->
+                     <div class="monitoring-section">
+                         <h4><i class="fas fa-clock"></i> Timer</h4>
+                         <div class="timer-controls">
+                             <div class="timer-display-container">
+                                 <div class="timer-display" id="timer-display">00:00:00</div>
+                                 <div class="target-time">Target: --:--:--</div>
+                             </div>
+                             <div class="timer-buttons">
+                                 <button id="timer-start-btn" class="timer-btn timer-start" onclick="startTimer()">Start</button>
+                                 <button id="timer-stop-btn" class="timer-btn timer-stop" onclick="stopTimer()">Stop</button>
+                                 <button id="timer-reset-btn" class="timer-btn timer-reset" onclick="resetTimer()">Reset</button>
+                             </div>
+                         </div>
+                     </div>
+
+                     <!-- Monitoring Status -->
+                     <div class="monitoring-section">
+                         <h4><i class="fas fa-chart-line"></i> Status</h4>
+                         <div class="monitoring-status">
+                             <div class="status-item">
+                                 <span class="status-label">Active Calculations:</span>
+                                 <span class="status-value" id="active-calculations">0</span>
+                             </div>
+                             <div class="status-item">
+                                 <span class="status-label">Critical Flags:</span>
+                                 <span class="status-flags" id="critical-flags">0</span>
+                             </div>
+                         </div>
+                     </div>
+
+                     <!-- Flags Container -->
+                     <div class="monitoring-section">
+                         <h4><i class="fas fa-flag"></i> Active Flags</h4>
+                         <div class="flags-container" id="flags-display">
+                             <div class="no-flags">
+                                 <i class="fas fa-check-circle"></i>
+                                 <p>No active flags</p>
+                             </div>
+                         </div>
+                     </div>
+
+                     <!-- Tracking Graph -->
+                     <div class="monitoring-section">
+                         <h4><i class="fas fa-chart-line"></i> Tracking Graph</h4>
+                         <div class="graph-controls">
+                             <div class="graph-control-row">
+                                 <label for="graph-type-select">Data Type:</label>
+                                 <select id="graph-type-select" onchange="updateTrackingGraph()">
+                                     <option value="bg">Blood Glucose</option>
+                                     <option value="rate">Infusion Rate</option>
+                                     <option value="both">Both</option>
+                                 </select>
+                             </div>
+                             <div class="graph-control-row">
+                                 <label for="graph-timeframe-select">Timeframe:</label>
+                                 <select id="graph-timeframe-select" onchange="updateTrackingGraph()">
+                                     <option value="6">Last 6 hours</option>
+                                     <option value="12">Last 12 hours</option>
+                                     <option value="24" selected>Last 24 hours</option>
+                                     <option value="48">Last 48 hours</option>
+                                 </select>
+                             </div>
+                         </div>
+                         <div class="chart-container">
+                             <canvas id="tracking-chart"></canvas>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Settings Tab -->
+         <div id="settings-content" class="protocol-content">
+             <div class="container">
+                 <h1>Settings</h1>
+                 <div class="settings-content-wrapper">
+
+                     <!-- Data Management -->
+                     <div class="settings-section">
+                         <h3>Data Management</h3>
+                         <div class="data-management">
+                             <h5><i class="fas fa-database"></i> Clear Data</h5>
+                             <div class="data-clear-buttons">
+                                 <button class="clear-btn clear-bg" onclick="clearHistory()">Clear History</button>
+                                 <button class="clear-btn clear-rates" onclick="clearMonitoringData()">Clear Monitoring</button>
+                                 <button class="clear-btn clear-all" onclick="clearAllData()">Clear All</button>
+                             </div>
+                             <div class="data-summary" id="data-summary">
+                                 <span class="data-summary-text" id="data-summary-text">No stored data</span>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+
      </div> <!-- This closes .tab-content -->
  </div> <!-- This closes .main-wrapper -->
 
@@ -1120,8 +1273,21 @@
 
 
  <footer class="site-footer">
-    <p>© 2025 BANH BAO</p>
-    <p>Developed, tested, and oversaw by Banh Bao</p>
+    <div class="footer-content">
+        <div class="footer-left">
+            <p>© 2025 BANH BAO</p>
+        </div>
+        <div class="footer-right">
+            <div class="theme-toggle">
+                <span class="theme-icon sun-icon">☀️</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="dark-mode-setting" onchange="toggleDarkMode()">
+                    <span class="toggle-slider"></span>
+                </label>
+                <span class="theme-icon moon-icon">🌙</span>
+            </div>
+        </div>
+    </div>
 </footer>
 
  <script src="./logic.js"></script>
