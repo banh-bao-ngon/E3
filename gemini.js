@@ -1,7 +1,17 @@
 // Vercel Serverless Function to proxy Gemini API requests
 // This keeps the API key secure on the server side
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle preflight request
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
     // Only allow POST requests
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
@@ -21,8 +31,6 @@ export default async function handler(req, res) {
         if (!message || typeof message !== 'string') {
             return res.status(400).json({ error: 'Message is required' });
         }
-
-        // Rate limiting could be added here if needed
 
         const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. When given a drug name, give me concise nursing information about [drug name], including its indications, how to administer it, common side effects, and when the patient should report to the doctor. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
 
@@ -69,4 +77,4 @@ export default async function handler(req, res) {
         console.error('Proxy error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
