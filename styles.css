@@ -273,9 +273,13 @@ body.dark-mode label {
 }
 
 /* Timestamps and completion indicators */
-body.dark-mode .calculation-timestamp,
-body.dark-mode .completion-indicator {
+body.dark-mode .calculation-timestamp {
     color: var(--text-light);
+}
+
+body.dark-mode .completion-indicator {
+    background: #1e5128;
+    color: #a8e6a3;
 }
 
 /* Modal content */
@@ -1294,6 +1298,140 @@ h1 {
     color: #c0392b;
     font-weight: 600;
     list-style-type: circle;
+}
+
+/* DKA Potassium Warning Banner */
+.dka-potassium-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+    border: 1px solid #ffc107;
+    border-left: 4px solid #ff9800;
+    border-radius: 8px;
+    color: #856404;
+    font-size: 0.95rem;
+}
+
+.dka-potassium-banner i {
+    color: #ff9800;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+body.dark-mode .dka-potassium-banner {
+    background: linear-gradient(135deg, #4a3f2a 0%, #3d3422 100%);
+    border-color: #8b7355;
+    border-left-color: #ffa726;
+    color: #ffd54f;
+}
+
+body.dark-mode .dka-potassium-banner i {
+    color: #ffa726;
+}
+
+/* Lab Inputs Section */
+.lab-inputs-section {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: var(--light-grey);
+    border-radius: 8px;
+    border: 1px dashed var(--border-color);
+}
+
+.lab-inputs-label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab-inputs-label i {
+    color: var(--primary-blue);
+}
+
+.lab-inputs-section .input-stack {
+    margin-top: 0.5rem;
+}
+
+body.dark-mode .lab-inputs-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-color);
+}
+
+/* Lab Display Results */
+.lab-display {
+    margin-top: 0.75rem;
+}
+
+.lab-result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.lab-result-item:last-child {
+    margin-bottom: 0;
+}
+
+.lab-name {
+    font-weight: 600;
+    min-width: 50px;
+}
+
+.lab-name i {
+    margin-right: 0.25rem;
+}
+
+.lab-value {
+    font-weight: 700;
+    min-width: 80px;
+}
+
+.lab-status {
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.lab-result-item.lab-normal {
+    background: var(--success-light);
+    border-left: 3px solid var(--primary-green);
+    color: #155724;
+}
+
+.lab-result-item.lab-warning {
+    background: var(--warning-light);
+    border-left: 3px solid #ffc107;
+    color: #856404;
+}
+
+.lab-result-item.lab-critical {
+    background: var(--danger-light);
+    border-left: 3px solid var(--primary-red);
+    color: #721c24;
+}
+
+body.dark-mode .lab-result-item.lab-normal {
+    background: rgba(40, 167, 69, 0.2);
+    color: #a8e6a3;
+}
+
+body.dark-mode .lab-result-item.lab-warning {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffd54f;
+}
+
+body.dark-mode .lab-result-item.lab-critical {
+    background: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b;
 }
 
 /* DKA Phase Tabs */
@@ -2360,6 +2498,42 @@ body.dark-mode .data-summary {
 .flag-btn:hover {
     transform: translateY(-1px);
     box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+/* Flag History */
+.flag-history-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.flag-acknowledged {
+    opacity: 0.85;
+}
+
+.flag-acknowledged .flag-message {
+    margin-bottom: 0;
+}
+
+.clear-history-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    margin-left: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+
+.clear-history-btn:hover {
+    background: var(--danger-light);
+    color: var(--primary-red);
+}
+
+body.dark-mode .clear-history-btn:hover {
+    background: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b;
 }
 
 /* Notification System */
@@ -4007,5 +4181,3 @@ body.dark-mode .checklist-item:has(.checklist-checkbox:checked) {
 body.dark-mode .checklist-item:has(.checklist-checkbox:checked) label {
     color: var(--success-green);
 }
-
-
