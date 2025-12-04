@@ -2,18 +2,24 @@
 console.log('Logic.js script loaded successfully');
 let calculationHistory = [];
 let pendingCalculation = null;
-// API key from Vercel environment variables (injected at build time)
-const EMBEDDED_API_KEY = typeof process !== 'undefined' && process.env && process.env.VITE_GEMINI_API_KEY
-    ? process.env.VITE_GEMINI_API_KEY
-    : 'AIzaSyAoIyKIQ3iPgSF3Dnb-3aj2oJ7yDxFSK90'; // Fallback for local development
+// API key from environment variables (set in Vercel dashboard or .env file for local dev)
+// IMPORTANT: Never commit actual API keys to version control
+const EMBEDDED_API_KEY = typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY
+    ? import.meta.env.VITE_GEMINI_API_KEY
+    : null;
 
 // Monitoring system variables
 let monitoringData = {
     dkaHhs: {
         bgReadings: [], // {timestamp, value, protocolType}
         infusionRates: [], // {timestamp, value, protocolType}
+        potassiumReadings: [], // {timestamp, value}
+        anionGapReadings: [], // {timestamp, value}
         lastBgFlag: null,
-        lastRateFlag: null
+        lastRateFlag: null,
+        lastAnionGapFlag: null,
+        lastPotassiumStableFlag: null,
+        lastLowPotassiumFlag: null
     },
     nonDka: {
         bgReadings: [], // {timestamp, value, protocolType}
@@ -863,7 +869,7 @@ function performInsulinRateCalculation(bg, resultsDiv) {
          rateMessage = `BG is below the threshold for calculation. Consult provider.`;
          resultClass = 'result-warning';
     } else {
-        rateMessage = `Calculated initial infusion rate: <strong>${calculatedRate.toFixed(1)} units/hr</strong>.`;
+        rateMessage = `Calculated initial infusion rate: <strong>${calculatedRate.toFixed(2)} units/hr</strong>.`;
         if (bg > 600) {
             rateMessage += `<br><br><strong style="color: #c0392b;">Warning: BG > 600 mg/dL. Starting rate REQUIRES PHYSICIAN ORDER.</strong>`;
             resultClass = 'result-critical';
@@ -889,7 +895,7 @@ function performInsulinRateCalculation(bg, resultsDiv) {
     addToHistory(
         'Non-DKA Insulin Initial Rate',
         `BG: ${bg} mg/dL`,
-        `Rate: ${calculatedRate.toFixed(1)} units/hr`,
+        `Rate: ${calculatedRate.toFixed(2)} units/hr`,
         bg > 600
     );
 
@@ -956,136 +962,136 @@ function performInsulinAdjustmentCalculation(currentRate, currentBg, previousBgI
             if (!isNaN(previousBg) && previousBg < 100) {
                 const newRate = Math.max(0, currentRate - 1);
                 adjustment = `<strong>Action:</strong> Decrease rate by 1 unit/hr. <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 141 && previousBg <= 300) {
                 const change = Math.max(currentRate * 0.50, 2);
                 const newRate = Math.max(0, currentRate - change);
-                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (50% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(2)} units/hr (50% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg > 300) {
                 const change = Math.max(currentRate * 0.70, 2);
                 const newRate = Math.max(0, currentRate - change);
-                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (70% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(2)} units/hr (70% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else { 
                 const change = Math.max(currentRate * 0.25, 0.5);
                 const newRate = Math.max(0, currentRate - change);
-                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (25% or 0.5 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(2)} units/hr (25% or 0.5 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Check BG q 30 min until ≥ 140 mg/dL.`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             }
         } 
         else if (currentBg >= 141 && currentBg <= 180) {
             if (!isNaN(previousBg) && previousBg >= 201) {
                  const change = Math.max(currentRate * 0.50, 2);
                  const newRate = Math.max(0, currentRate - change);
-                 adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (50% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Continue hourly BG checks.`;
-                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                 adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(2)} units/hr (50% or 2 units/hr, whichever is greater). <br><strong>Follow-up:</strong> Continue hourly BG checks.`;
+                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
                  resultClass = 'result-warning';
             } else {
                  resultClass = 'result-therapeutic';
                  adjustment = "<strong>Action:</strong> No change in rate.";
-                 newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
+                 newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(2)} units/hr`;
             }
         } 
         else if (currentBg >= 181 && currentBg <= 200) {
             if (!isNaN(previousBg) && previousBg < 100) {
                 const newRate = currentRate + 1;
                 adjustment = `<strong>Action:</strong> Increase rate by 1 unit/hr.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 100 && previousBg <= 180) {
                 const newRate = currentRate + 0.5;
                 adjustment = `<strong>Action:</strong> Increase rate by 0.5 unit/hr.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             }
             else if (!isNaN(previousBg) && previousBg >= 181 && previousBg <= 200) {
                 const change = Math.max(currentRate * 0.25, 1.0);
                 const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1 unit/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (25% or 1 unit/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 201 && previousBg <= 250) {
                 adjustment = "<strong>Action:</strong> No change to current rate.";
-                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
+                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(2)} units/hr`;
                 resultClass = 'result-therapeutic';
             } else if (!isNaN(previousBg) && previousBg >= 251) {
                 const change = Math.max(currentRate * 0.25, 2);
                 const newRate = Math.max(0, currentRate - change);
-                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(1)} units/hr (25% or 2 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Decrease rate by ${change.toFixed(2)} units/hr (25% or 2 units/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else {
                 const newRate = currentRate + 0.5;
                 adjustment = `<strong>Action:</strong> Increase rate by 0.5 units/hr.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             }
         } 
         else if (currentBg >= 201 && currentBg <= 250) {
             if (!isNaN(previousBg) && previousBg <= 180) {
                 const change = Math.max(currentRate * 0.25, 2.0);
                 const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 2 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (25% or 2 units/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 181 && previousBg <= 300) {
                 const change = Math.max(currentRate * 0.25, 1.0);
                 const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1 unit/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (25% or 1 unit/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 301 && previousBg <= 400) {
                 const newRate = currentRate + 1.0;
                 adjustment = `<strong>Action:</strong> Increase rate by 1 unit/hr.`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg > 400) {
                 adjustment = "<strong>Action:</strong> No change to current rate.";
-                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
+                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(2)} units/hr`;
                 resultClass = 'result-therapeutic';
             } else {
                  const change = Math.max(currentRate * 0.25, 1.0);
                  const newRate = Math.round((currentRate + change) * 10) / 10;
-                 adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (Fallback).`;
-                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                 adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (Fallback).`;
+                 newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             }
         }
         else if (currentBg >= 251 && currentBg <= 300) {
              if (!isNaN(previousBg) && previousBg <= 140) {
                 const change = Math.max(currentRate * 0.25, 2.5);
                 const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 2.5 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (25% or 2.5 units/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 141 && previousBg <= 180) {
                 const change = Math.max(currentRate * 0.25, 1.5);
                 const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1.5 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (25% or 1.5 units/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 181 && previousBg <= 250) {
                 const change = Math.max(currentRate * 0.25, 1.0);
                 const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1 unit/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (25% or 1 unit/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 251 && previousBg <= 300) {
                 const change = Math.max(currentRate * 0.25, 1.5);
                 const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 1.5 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (25% or 1.5 units/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg >= 301 && previousBg <= 400) {
                 const change = Math.max(currentRate * 0.25, 2.0);
                 const newRate = currentRate + change;
-                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (25% or 2 units/hr, whichever is greater).`;
-                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+                adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (25% or 2 units/hr, whichever is greater).`;
+                newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
             } else if (!isNaN(previousBg) && previousBg > 400) {
                 adjustment = "<strong>Action:</strong> No change to current rate.";
-                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(1)} units/hr`;
+                newRateInfo = `<strong>Current Rate:</strong> ${currentRate.toFixed(2)} units/hr`;
                 resultClass = 'result-therapeutic';
             }
         } 
         else if (currentBg >= 301 && currentBg <= 400) {
             const change = Math.max(currentRate * 0.40, 3.0);
             const newRate = currentRate + change;
-            adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (40% or 3 units/hr, whichever is greater).`;
-            newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+            adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (40% or 3 units/hr, whichever is greater).`;
+            newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
         } 
         else { 
             const change = Math.max(currentRate * 0.50, 4.0);
             const newRate = currentRate + change;
-            adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(1)} units/hr (50% or 4 units/hr, whichever is greater).`;
-            newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(1)} units/hr`;
+            adjustment = `<strong>Action:</strong> Increase rate by ${change.toFixed(2)} units/hr (50% or 4 units/hr, whichever is greater).`;
+            newRateInfo = `<strong>New Rate:</strong> ${newRate.toFixed(2)} units/hr`;
         }
     }
 
@@ -1132,7 +1138,7 @@ function calculateDkaBolus() {
     
     const bolusAmount = Math.min(weight * 0.1, 10); // 0.1 units/kg, max 10 units
     resultsDiv.innerHTML = `<div class="result-item result-therapeutic">
-        <p><strong>Regular Insulin Bolus:</strong> ${bolusAmount.toFixed(1)} units IV</p>
+        <p><strong>Regular Insulin Bolus:</strong> ${bolusAmount.toFixed(2)} units IV</p>
         <p style="margin-top: 0.5rem; font-size: 0.9em;">Calculated as 0.1 units/kg (Maximum: 10 units)</p>
     </div>`;
     
@@ -1142,7 +1148,7 @@ function calculateDkaBolus() {
     addToHistory(
         'DKA Bolus Calculation',
         `Weight: ${weight} kg`,
-        `Bolus: ${bolusAmount.toFixed(1)} units IV`,
+        `Bolus: ${bolusAmount.toFixed(2)} units IV`,
         false
     );
 }
@@ -1156,7 +1162,7 @@ function calculateDkaInitiation() {
     }
     const initialRate = weight * 0.1;
     resultsDiv.innerHTML = `<div class="result-item result-therapeutic">
-        <p><strong>Initial Infusion Rate:</strong> ${initialRate.toFixed(1)} units/hr</p>
+        <p><strong>Initial Infusion Rate:</strong> ${initialRate.toFixed(2)} units/hr</p>
         <p class="critical-warning" style="margin-top: 1rem;">Continue to Phase 1 Continuation only after 1 hour has passed.</p>
     </div>`;
     
@@ -1166,7 +1172,7 @@ function calculateDkaInitiation() {
     addToHistory(
         'DKA Phase 1 Initiation',
         `Weight: ${weight} kg`,
-        `Initial Rate: ${initialRate.toFixed(1)} units/hr`,
+        `Initial Rate: ${initialRate.toFixed(2)} units/hr`,
         false
     );
 
@@ -1177,6 +1183,8 @@ function calculateDkaInitiation() {
 function calculateDkaPhase1Continuation() {
     const currentRate = parseFloat(document.getElementById('phase1-current-rate').value);
     const rateChange = parseFloat(document.getElementById('phase1-rate-change').value);
+    const potassium = parseFloat(document.getElementById('phase1-potassium').value);
+    const anionGap = parseFloat(document.getElementById('phase1-anion-gap').value);
     const resultsDiv = document.getElementById('phase1-continuation-results');
 
     if (isNaN(currentRate) || isNaN(rateChange) || currentRate < 0) {
@@ -1186,9 +1194,9 @@ function calculateDkaPhase1Continuation() {
 
     let adjustmentText = '';
     let newRate = currentRate;
-    let resultClass = 'result-therapeutic'; 
+    let resultClass = 'result-therapeutic';
 
-    if (rateChange <= 50) { 
+    if (rateChange <= 50) {
         newRate = currentRate * 1.5;
         adjustmentText = `Increase current infusion rate by 50%.`;
         resultClass = 'result-warning';
@@ -1203,26 +1211,36 @@ function calculateDkaPhase1Continuation() {
     resultsDiv.innerHTML = `
         <div class="result-item ${resultClass}">
             <p><strong>Action:</strong> ${adjustmentText}</p>
-            <p style="margin-top: 0.5rem;"><strong>New Infusion Rate:</strong> ${newRate.toFixed(1)} units/hr</p>
+            <p style="margin-top: 0.5rem;"><strong>New Infusion Rate:</strong> ${newRate.toFixed(2)} units/hr</p>
         </div>`;
-    
+
     addTimestamp(resultsDiv);
     addCompletionIndicator(resultsDiv);
-    
+
     addToHistory(
         'DKA Phase 1 Continuation',
         `Current Rate: ${currentRate}, BG Drop: ${rateChange}`,
-        `New Rate: ${newRate.toFixed(1)} units/hr`,
+        `New Rate: ${newRate.toFixed(2)} units/hr`,
         rateChange > 100
     );
 
     // Add to monitoring system
     addMonitoringData('dka-hhs', null, newRate);
+
+    // Track lab values if provided
+    if (!isNaN(potassium)) {
+        addDkaLabData('potassium', potassium);
+    }
+    if (!isNaN(anionGap)) {
+        addDkaLabData('anionGap', anionGap);
+    }
 }
 
 function calculateDkaTransition() {
     const weight = parseFloat(document.getElementById('transition-weight').value);
     const currentRate = parseFloat(document.getElementById('transition-current-rate').value);
+    const potassium = parseFloat(document.getElementById('transition-potassium').value);
+    const anionGap = parseFloat(document.getElementById('transition-anion-gap').value);
     const resultsDiv = document.getElementById('transition-results');
 
     if (isNaN(weight) || weight <= 0 || isNaN(currentRate)) {
@@ -1232,31 +1250,41 @@ function calculateDkaTransition() {
 
     const calculatedRate = weight * 0.05;
     const newRate = Math.min(calculatedRate, currentRate);
-    
+
     resultsDiv.innerHTML = `
         <div class="result-item result-therapeutic">
-            <p><strong>Calculated Transition Rate (0.05 units/kg/hr):</strong> ${calculatedRate.toFixed(1)} units/hr</p>
-            <p style="margin-top: 0.5rem;"><strong>New Infusion Rate (Use lower of the two):</strong> ${newRate.toFixed(1)} units/hr</p>
+            <p><strong>Calculated Transition Rate (0.05 units/kg/hr):</strong> ${calculatedRate.toFixed(2)} units/hr</p>
+            <p style="margin-top: 0.5rem;"><strong>New Infusion Rate (Use lower of the two):</strong> ${newRate.toFixed(2)} units/hr</p>
             <p style="margin-top: 1rem;"><strong>Action:</strong> Change IVF to D5 1/2NS at 100 ml/hr and move to Phase 2 with next BG check.</p>
         </div>`;
-    
+
     addTimestamp(resultsDiv);
     addCompletionIndicator(resultsDiv);
-    
+
     addToHistory(
         'DKA Transition Phase',
         `Weight: ${weight} kg, Current Rate: ${currentRate}`,
-        `New Rate: ${newRate.toFixed(1)} units/hr`,
+        `New Rate: ${newRate.toFixed(2)} units/hr`,
         false
     );
 
     // Add to monitoring system
     addMonitoringData('dka-hhs', null, newRate);
+
+    // Track lab values if provided
+    if (!isNaN(potassium)) {
+        addDkaLabData('potassium', potassium);
+    }
+    if (!isNaN(anionGap)) {
+        addDkaLabData('anionGap', anionGap);
+    }
 }
 
 function calculateDkaPhase2() {
     const currentRate = parseFloat(document.getElementById('phase2-current-rate').value);
     const currentBg = parseInt(document.getElementById('phase2-current-bg').value, 10);
+    const potassium = parseFloat(document.getElementById('phase2-potassium').value);
+    const anionGap = parseFloat(document.getElementById('phase2-anion-gap').value);
     const resultsDiv = document.getElementById('phase2-results');
 
     if (isNaN(currentRate) || isNaN(currentBg)) {
@@ -1265,7 +1293,7 @@ function calculateDkaPhase2() {
     }
 
     let adjustment = '', newRate = currentRate, resultClass = 'result-warning';
-    
+
     if (currentBg > 250) {
         newRate += 2;
         adjustment = `<strong>Action:</strong> Increase rate by 2 units/hr.`;
@@ -1280,28 +1308,36 @@ function calculateDkaPhase2() {
         adjustment = `<strong>Action:</strong> Decrease rate by 50%.<br><strong>Follow-up:</strong> Recheck BG in 30 minutes.`;
     } else { // BG < 70
         newRate *= 0.5;
-        adjustment = `<strong class="critical-warning"><strong>Action</strong>: Stop infusion. Follow SDO for Hypoglycemia.</strong><br><strong>Resumption:</strong> When BG > 150 mg/dL, resume infusion at 50% of the most recent rate (${(currentRate * 0.5).toFixed(1)} units/hr).`;
+        adjustment = `<strong class="critical-warning"><strong>Action</strong>: Stop infusion. Follow SDO for Hypoglycemia.</strong><br><strong>Resumption:</strong> When BG > 150 mg/dL, resume infusion at 50% of the most recent rate (${(currentRate * 0.5).toFixed(2)} units/hr).`;
         resultClass = 'result-critical';
     }
-    
+
     resultsDiv.innerHTML = `
         <div class="result-item ${resultClass}">
             <p>${adjustment}</p>
-            ${currentBg >= 70 ? `<p style="margin-top: 0.5rem;"><strong>New Infusion Rate:</strong> ${newRate.toFixed(1)} units/hr</p>` : ''}
+            ${currentBg >= 70 ? `<p style="margin-top: 0.5rem;"><strong>New Infusion Rate:</strong> ${newRate.toFixed(2)} units/hr</p>` : ''}
         </div>`;
-    
+
     addTimestamp(resultsDiv);
     addCompletionIndicator(resultsDiv);
-    
+
     addToHistory(
         'DKA Phase 2',
         `Current Rate: ${currentRate}, BG: ${currentBg}`,
-        `New Rate: ${newRate.toFixed(1)} units/hr`,
+        `New Rate: ${newRate.toFixed(2)} units/hr`,
         currentBg < 70
     );
 
     // Add to monitoring system
     addMonitoringData('dka-hhs', currentBg, newRate);
+
+    // Track lab values if provided
+    if (!isNaN(potassium)) {
+        addDkaLabData('potassium', potassium);
+    }
+    if (!isNaN(anionGap)) {
+        addDkaLabData('anionGap', anionGap);
+    }
 }
 
 // --- Gemini AI ---
@@ -1326,7 +1362,7 @@ const handleGeminiChat = async () => {
     try {
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${EMBEDDED_API_KEY}`;
 
-        const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. When given a drug name, give me concise nursing information about [drug name], including its indications, pharmacokinetics, how to administer it,common side effects, and when the patient should report to the doctor. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
+        const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. When given a drug name, give me concise nursing information about [drug name], including its indications, how to administer it,common side effects, and when the patient should report to the doctor. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
 
         const payload = {
             contents: [{ 
@@ -1458,6 +1494,174 @@ function addMonitoringData(protocolType, bgValue, infusionRate) {
     updateDataSummary();
 }
 
+// Track last saved lab values to avoid duplicate entries
+let lastSavedLabValues = {
+    potassium: null,
+    anionGap: null
+};
+
+function updateLabDisplay(phase) {
+    const potassiumInput = document.getElementById(`${phase}-potassium`);
+    const anionGapInput = document.getElementById(`${phase}-anion-gap`);
+    const displayDiv = document.getElementById(`${phase}-lab-display`);
+
+    if (!displayDiv) return;
+
+    const potassium = parseFloat(potassiumInput?.value);
+    const anionGap = parseFloat(anionGapInput?.value);
+
+    let html = '';
+    let hasValues = false;
+
+    // Potassium display with status
+    if (!isNaN(potassium)) {
+        hasValues = true;
+        let potassiumStatus = '';
+        let potassiumClass = '';
+
+        if (potassium <= 3.3) {
+            potassiumStatus = 'CRITICAL - Hold insulin drip';
+            potassiumClass = 'lab-critical';
+        } else if (potassium < 4.0) {
+            potassiumStatus = 'Low - Monitor closely';
+            potassiumClass = 'lab-warning';
+        } else if (potassium <= 5.0) {
+            potassiumStatus = 'Stable';
+            potassiumClass = 'lab-normal';
+        } else if (potassium <= 5.5) {
+            potassiumStatus = 'Elevated - Monitor';
+            potassiumClass = 'lab-warning';
+        } else {
+            potassiumStatus = 'High - Notify Provider';
+            potassiumClass = 'lab-critical';
+        }
+
+        html += `<div class="lab-result-item ${potassiumClass}">
+            <span class="lab-name"><i class="fas fa-vial"></i> K+:</span>
+            <span class="lab-value">${potassium.toFixed(1)} mEq/L</span>
+            <span class="lab-status">${potassiumStatus}</span>
+        </div>`;
+    }
+
+    // Anion Gap display with status
+    if (!isNaN(anionGap)) {
+        hasValues = true;
+        let agStatus = '';
+        let agClass = '';
+
+        if (anionGap < 12) {
+            agStatus = 'Closed - Consider SQ transition';
+            agClass = 'lab-normal';
+        } else if (anionGap <= 16) {
+            agStatus = 'Mildly elevated';
+            agClass = 'lab-warning';
+        } else {
+            agStatus = 'Elevated - Continue IV insulin';
+            agClass = 'lab-critical';
+        }
+
+        html += `<div class="lab-result-item ${agClass}">
+            <span class="lab-name"><i class="fas fa-chart-bar"></i> AG:</span>
+            <span class="lab-value">${anionGap.toFixed(1)}</span>
+            <span class="lab-status">${agStatus}</span>
+        </div>`;
+    }
+
+    displayDiv.innerHTML = hasValues ? html : '';
+}
+
+// Save lab values when user finishes entering (on blur/change)
+function saveLabValue(phase, labType) {
+    const inputId = `${phase}-${labType === 'potassium' ? 'potassium' : 'anion-gap'}`;
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const value = parseFloat(input.value);
+    if (isNaN(value)) return;
+
+    // Only save if value changed from last saved
+    const lastValue = lastSavedLabValues[labType];
+    if (lastValue !== value) {
+        lastSavedLabValues[labType] = value;
+        addDkaLabData(labType, value);
+    }
+}
+
+function addDkaLabData(labType, value) {
+    const timestamp = new Date();
+
+    if (labType === 'potassium') {
+        monitoringData.dkaHhs.potassiumReadings.push({ timestamp, value });
+        // Keep only last 24 hours of readings
+        const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        monitoringData.dkaHhs.potassiumReadings = monitoringData.dkaHhs.potassiumReadings.filter(
+            reading => reading.timestamp > cutoff
+        );
+    } else if (labType === 'anionGap') {
+        monitoringData.dkaHhs.anionGapReadings.push({ timestamp, value });
+        // Keep only last 24 hours of readings
+        const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        monitoringData.dkaHhs.anionGapReadings = monitoringData.dkaHhs.anionGapReadings.filter(
+            reading => reading.timestamp > cutoff
+        );
+    }
+
+    // Check for lab-related flag conditions
+    checkDkaLabConditions();
+    saveMonitoringData();
+    updateDataSummary();
+}
+
+function checkDkaLabConditions() {
+    const now = new Date();
+
+    // Check for low potassium (≤ 3.3 mEq/L) - critical warning
+    const potassiumReadings = monitoringData.dkaHhs.potassiumReadings;
+    if (potassiumReadings.length > 0) {
+        const latestPotassium = potassiumReadings[potassiumReadings.length - 1];
+        if (latestPotassium.value <= 3.3 &&
+            (!monitoringData.dkaHhs.lastLowPotassiumFlag ||
+             now.getTime() - monitoringData.dkaHhs.lastLowPotassiumFlag.getTime() > 60 * 60 * 1000)) {
+            addFlag('dka-potassium-low', `Potassium is ${latestPotassium.value} mEq/L (≤ 3.3). HOLD insulin drip until potassium is repleted. Notify Provider.`, 'critical');
+            monitoringData.dkaHhs.lastLowPotassiumFlag = now;
+        }
+    }
+
+    // Check for potassium stable at 4.0-5.0 for 4 hours (2 consecutive panels)
+    const fourHoursAgo = new Date(now.getTime() - 4 * 60 * 60 * 1000);
+    const recentPotassiumReadings = potassiumReadings.filter(
+        reading => reading.timestamp >= fourHoursAgo
+    );
+
+    if (recentPotassiumReadings.length >= 2) {
+        const allStable = recentPotassiumReadings.every(
+            reading => reading.value >= 4.0 && reading.value <= 5.0
+        );
+        if (allStable &&
+            (!monitoringData.dkaHhs.lastPotassiumStableFlag ||
+             now.getTime() - monitoringData.dkaHhs.lastPotassiumStableFlag.getTime() > 60 * 60 * 1000)) {
+            addFlag('dka-potassium-stable', 'Potassium stable (4.0-5.0 mEq/L) for 4 hours (2 consecutive panels). May switch to chemistry panels every 4 hours.', 'info');
+            monitoringData.dkaHhs.lastPotassiumStableFlag = now;
+        }
+    }
+
+    // Check for anion gap closed (< 12) for 4 hours (2 consecutive panels)
+    const anionGapReadings = monitoringData.dkaHhs.anionGapReadings;
+    const recentAnionGapReadings = anionGapReadings.filter(
+        reading => reading.timestamp >= fourHoursAgo
+    );
+
+    if (recentAnionGapReadings.length >= 2) {
+        const allClosed = recentAnionGapReadings.every(reading => reading.value < 12);
+        if (allClosed &&
+            (!monitoringData.dkaHhs.lastAnionGapFlag ||
+             now.getTime() - monitoringData.dkaHhs.lastAnionGapFlag.getTime() > 60 * 60 * 1000)) {
+            addFlag('dka-anion-gap-closed', 'Anion gap < 12 for 4 hours (2 consecutive panels). Consider transition to subcutaneous insulin.', 'info');
+            monitoringData.dkaHhs.lastAnionGapFlag = now;
+        }
+    }
+}
+
 function checkDkaHhsConditions() {
     const now = new Date();
 
@@ -1581,6 +1785,32 @@ function loadMonitoringData() {
                     if (type === 'nonDka' && !parsed[type].infusionRates) {
                         parsed[type].infusionRates = [];
                     }
+
+                    // Handle DKA lab readings (backward compatibility)
+                    if (type === 'dkaHhs') {
+                        ['potassiumReadings', 'anionGapReadings'].forEach(prop => {
+                            if (parsed[type][prop]) {
+                                parsed[type][prop] = parsed[type][prop].map(reading => ({
+                                    ...reading,
+                                    timestamp: new Date(reading.timestamp)
+                                }));
+                            } else {
+                                parsed[type][prop] = [];
+                            }
+                        });
+
+                        // Restore new flag timestamps
+                        if (parsed[type].lastAnionGapFlag) {
+                            parsed[type].lastAnionGapFlag = new Date(parsed[type].lastAnionGapFlag);
+                        }
+                        if (parsed[type].lastPotassiumStableFlag) {
+                            parsed[type].lastPotassiumStableFlag = new Date(parsed[type].lastPotassiumStableFlag);
+                        }
+                        if (parsed[type].lastLowPotassiumFlag) {
+                            parsed[type].lastLowPotassiumFlag = new Date(parsed[type].lastLowPotassiumFlag);
+                        }
+                    }
+
                     if (parsed[type].lastBgFlag) {
                         parsed[type].lastBgFlag = new Date(parsed[type].lastBgFlag);
                     }
@@ -1731,34 +1961,70 @@ function showNotification(message, severity = 'info') {
 }
 
 function updateFlagsDisplay() {
-    const flagsContainer = document.getElementById('flags-container');
-    if (!flagsContainer) return;
+    const flagsContainer = document.getElementById('flags-display');
+    const flagHistoryContainer = document.getElementById('flag-history-display');
 
-    const activeFlags = monitoringData.activeFlags.filter(flag => !flag.acknowledged);
+    // Update active flags display
+    if (flagsContainer) {
+        const activeFlags = monitoringData.activeFlags.filter(flag => !flag.acknowledged);
 
-    if (activeFlags.length === 0) {
-        flagsContainer.innerHTML = '<p class="no-flags">No active alerts</p>';
-        updateFlagBadge();
-        return;
+        if (activeFlags.length === 0) {
+            flagsContainer.innerHTML = '<p class="no-flags">No active alerts</p>';
+        } else {
+            flagsContainer.innerHTML = activeFlags.map(flag => `
+                <div class="flag-item flag-${flag.severity}">
+                    <div class="flag-content">
+                        <div class="flag-header">
+                            <i class="fas ${flag.severity === 'critical' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+                            <span class="flag-time">${flag.timestamp.toLocaleTimeString()}</span>
+                        </div>
+                        <div class="flag-message">${flag.message}</div>
+                        <div class="flag-actions">
+                            <button onclick="acknowledgeFlag(${flag.id})" class="flag-btn flag-acknowledge">Acknowledge</button>
+                            <button onclick="clearFlag(${flag.id})" class="flag-btn flag-clear">Clear</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
     }
 
-    flagsContainer.innerHTML = activeFlags.map(flag => `
-        <div class="flag-item flag-${flag.severity}">
-            <div class="flag-content">
-                <div class="flag-header">
-                    <i class="fas ${flag.severity === 'critical' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
-                    <span class="flag-time">${flag.timestamp.toLocaleTimeString()}</span>
+    // Update flag history display
+    if (flagHistoryContainer) {
+        const acknowledgedFlags = monitoringData.activeFlags.filter(flag => flag.acknowledged);
+
+        if (acknowledgedFlags.length === 0) {
+            flagHistoryContainer.innerHTML = `
+                <div class="no-flags">
+                    <i class="fas fa-clipboard-check"></i>
+                    <p>No acknowledged flags</p>
                 </div>
-                <div class="flag-message">${flag.message}</div>
-                <div class="flag-actions">
-                    <button onclick="acknowledgeFlag(${flag.id})" class="flag-btn flag-acknowledge">Acknowledge</button>
-                    <button onclick="clearFlag(${flag.id})" class="flag-btn flag-clear">Clear</button>
+            `;
+        } else {
+            // Sort by timestamp, most recent first
+            const sortedFlags = [...acknowledgedFlags].sort((a, b) => b.timestamp - a.timestamp);
+            flagHistoryContainer.innerHTML = sortedFlags.map(flag => `
+                <div class="flag-item flag-${flag.severity} flag-acknowledged">
+                    <div class="flag-content">
+                        <div class="flag-header">
+                            <i class="fas ${flag.severity === 'critical' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+                            <span class="flag-time">${flag.timestamp.toLocaleTimeString()} - ${flag.timestamp.toLocaleDateString()}</span>
+                        </div>
+                        <div class="flag-message">${flag.message}</div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    `).join('');
+            `).join('');
+        }
+    }
 
     updateFlagBadge();
+}
+
+function clearFlagHistory() {
+    monitoringData.activeFlags = monitoringData.activeFlags.filter(flag => !flag.acknowledged);
+    updateFlagsDisplay();
+    saveMonitoringData();
+    showNotification('Flag history cleared', 'info');
 }
 
 function toggleMonitoringPanel() {
@@ -2341,5 +2607,4 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDischargeChecklistState();
     }, 100);
 });
-
 
