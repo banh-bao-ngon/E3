@@ -161,6 +161,10 @@
                  
                  <!-- DKA/HHS PROTOCOL (Initially Hidden) -->
                  <div id="dka-hhs-protocol" style="display: none;">
+                    <div class="dka-potassium-banner">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span><strong>Before starting insulin drip:</strong> Ensure potassium is <strong>&gt; 3.3 mEq/L</strong>. Insulin causes hypokalemia.</span>
+                    </div>
                     <div class="dka-phase-tabs">
                         <button class="dka-phase-button active" data-dka-phase="phase1" onclick="switchDkaPhase('phase1')">Phase 1</button>
                         <button class="dka-phase-button" data-dka-phase="transition" onclick="switchDkaPhase('transition')">Transition Phase</button>
@@ -199,6 +203,20 @@
                                     <input type="number" id="phase1-rate-change" min="0" max="500" placeholder="e.g., 60" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaPhase1Continuation();}">
                                 </div>
                             </div>
+                            <div class="lab-inputs-section">
+                                <p class="lab-inputs-label"><i class="fas fa-flask"></i> Lab Values (optional - for monitoring)</p>
+                                <div class="input-stack">
+                                    <div class="input-row">
+                                        <label for="phase1-potassium">Potassium (mEq/L):</label>
+                                        <input type="number" id="phase1-potassium" min="0" max="10" step="0.1" placeholder="e.g., 4.2" oninput="updateLabDisplay('phase1')" onchange="saveLabValue('phase1', 'potassium')">
+                                    </div>
+                                    <div class="input-row">
+                                        <label for="phase1-anion-gap">Anion Gap:</label>
+                                        <input type="number" id="phase1-anion-gap" min="0" max="50" step="0.1" placeholder="e.g., 18" oninput="updateLabDisplay('phase1')" onchange="saveLabValue('phase1', 'anionGap')">
+                                    </div>
+                                </div>
+                                <div id="phase1-lab-display" class="lab-display"></div>
+                            </div>
                             <div class="input-group">
                                 <button onclick="calculateDkaPhase1Continuation()">Calculate Adjustment</button>
                             </div>
@@ -226,6 +244,20 @@
                                     <input type="number" id="transition-current-rate" min="0" max="100" step="0.1" placeholder="e.g., 7.0" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaTransition();}">
                                 </div>
                             </div>
+                            <div class="lab-inputs-section">
+                                <p class="lab-inputs-label"><i class="fas fa-flask"></i> Lab Values (optional - for monitoring)</p>
+                                <div class="input-stack">
+                                    <div class="input-row">
+                                        <label for="transition-potassium">Potassium (mEq/L):</label>
+                                        <input type="number" id="transition-potassium" min="0" max="10" step="0.1" placeholder="e.g., 4.2" oninput="updateLabDisplay('transition')" onchange="saveLabValue('transition', 'potassium')">
+                                    </div>
+                                    <div class="input-row">
+                                        <label for="transition-anion-gap">Anion Gap:</label>
+                                        <input type="number" id="transition-anion-gap" min="0" max="50" step="0.1" placeholder="e.g., 14" oninput="updateLabDisplay('transition')" onchange="saveLabValue('transition', 'anionGap')">
+                                    </div>
+                                </div>
+                                <div id="transition-lab-display" class="lab-display"></div>
+                            </div>
                             <div class="input-group">
                                 <button onclick="calculateDkaTransition()">Calculate Transition</button>
                             </div>
@@ -246,6 +278,20 @@
                                     <label for="phase2-current-bg">Current BG (mg/dL):</label>
                                     <input type="number" id="phase2-current-bg" min="0" max="1500" placeholder="e.g., 180" onkeypress="if(event.key==='Enter'){event.preventDefault();calculateDkaPhase2();}">
                                 </div>
+                            </div>
+                            <div class="lab-inputs-section">
+                                <p class="lab-inputs-label"><i class="fas fa-flask"></i> Lab Values (optional - for monitoring)</p>
+                                <div class="input-stack">
+                                    <div class="input-row">
+                                        <label for="phase2-potassium">Potassium (mEq/L):</label>
+                                        <input type="number" id="phase2-potassium" min="0" max="10" step="0.1" placeholder="e.g., 4.2" oninput="updateLabDisplay('phase2')" onchange="saveLabValue('phase2', 'potassium')">
+                                    </div>
+                                    <div class="input-row">
+                                        <label for="phase2-anion-gap">Anion Gap:</label>
+                                        <input type="number" id="phase2-anion-gap" min="0" max="50" step="0.1" placeholder="e.g., 10" oninput="updateLabDisplay('phase2')" onchange="saveLabValue('phase2', 'anionGap')">
+                                    </div>
+                                </div>
+                                <div id="phase2-lab-display" class="lab-display"></div>
                             </div>
                             <div class="input-group">
                                 <button onclick="calculateDkaPhase2()">Calculate Phase 2</button>
@@ -1176,6 +1222,17 @@
                              <div class="no-flags">
                                  <i class="fas fa-check-circle"></i>
                                  <p>No active flags</p>
+                             </div>
+                         </div>
+                     </div>
+
+                     <!-- Flag History -->
+                     <div class="monitoring-section">
+                         <h4><i class="fas fa-history"></i> Flag History <button class="clear-history-btn" onclick="clearFlagHistory()" title="Clear flag history"><i class="fas fa-trash-alt"></i></button></h4>
+                         <div class="flags-container flag-history-container" id="flag-history-display">
+                             <div class="no-flags">
+                                 <i class="fas fa-clipboard-check"></i>
+                                 <p>No acknowledged flags</p>
                              </div>
                          </div>
                      </div>
