@@ -2,11 +2,8 @@
 console.log('Logic.js script loaded successfully');
 let calculationHistory = [];
 let pendingCalculation = null;
-// API key from environment variables (set in Vercel dashboard or .env file for local dev)
-// IMPORTANT: Never commit actual API keys to version control
-const EMBEDDED_API_KEY = typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY
-    ? import.meta.env.VITE_GEMINI_API_KEY
-    : null;
+// Gemini AI is now handled via server-side API proxy for security
+// See /api/gemini.js for the serverless function
 
 // Monitoring system variables
 let monitoringData = {
@@ -447,10 +444,9 @@ function updateDataSummary() {
     const activeFlagsCount = monitoringData.activeFlags.length;
 
     // Check for other stored data
-    const apiKeyStored = localStorage.getItem('gemini_api_key') ? 1 : 0;
     const disclaimerAccepted = localStorage.getItem('disclaimer_accepted') ? 1 : 0;
 
-    const totalDataPoints = historyCount + totalMonitoringReadings + activeFlagsCount + apiKeyStored + disclaimerAccepted;
+    const totalDataPoints = historyCount + totalMonitoringReadings + activeFlagsCount + disclaimerAccepted;
 
     if (totalDataPoints === 0) {
         summaryElement.textContent = 'No stored data';
@@ -465,9 +461,6 @@ function updateDataSummary() {
         }
         if (activeFlagsCount > 0) {
             parts.push(`${activeFlagsCount} active flag${activeFlagsCount === 1 ? '' : 's'}`);
-        }
-        if (apiKeyStored > 0) {
-            parts.push('API key');
         }
         if (disclaimerAccepted > 0) {
             parts.push('preferences');
@@ -1349,58 +1342,30 @@ const handleGeminiChat = async () => {
     const userMessage = geminiInput.value.trim();
     if (!userMessage) return;
 
-    if (!EMBEDDED_API_KEY || EMBEDDED_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
-        appendMessage('AI service is currently unavailable. Please contact administrator.', 'bot error');
-        return;
-    }
-
     appendMessage(userMessage, 'user');
     geminiInput.value = '';
 
     const thinkingMessage = appendMessage('Thinking...', 'bot');
 
     try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${EMBEDDED_API_KEY}`;
-
-        const systemPrompt = "You are a helpful assistant for medical professionals. Provide informative, accurate, and concise responses. When given a drug name, give me concise nursing information about [drug name], including its indications, how to administer it,common side effects, and when the patient should report to the doctor. You are supplementary only - always remind users to use clinical judgment. Do not provide direct medical advice. Answer questions about clinical protocols, drug interactions, and medical calculations based on provided information or public knowledge. Always cite sources when possible. Keep responses brief and focused.";
-
-        const payload = {
-            contents: [{ 
-                parts: [{ 
-                    text: systemPrompt + "\n\nUser question: " + userMessage 
-                }] 
-            }],
-            generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 1024,
-            }
-        };
-
-        const response = await fetch(apiUrl, {
+        // Use server-side API proxy to keep API key secure
+        const response = await fetch('/api/gemini', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ message: userMessage })
         });
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+            throw new Error(data.error || `Request failed with status ${response.status}`);
         }
 
-        const result = await response.json();
-        const candidate = result.candidates?.[0];
-
-        let botResponse = "Sorry, I couldn't process that request. Please try again.";
-        if (candidate && candidate.content?.parts?.[0]?.text) {
-            botResponse = candidate.content.parts[0].text;
-            botResponse += "\n\n*Remember: This is supplementary information only. Always use your clinical judgment and verify independently.*";
-        }
-
-        thinkingMessage.innerHTML = formatResponse(botResponse);
+        thinkingMessage.innerHTML = formatResponse(data.response);
 
     } catch (error) {
         console.error("Gemini API Error:", error);
-        thinkingMessage.innerHTML = `Error: ${error.message}. Please check your API key and try again.`;
+        thinkingMessage.innerHTML = `Error: ${error.message}. Please try again later.`;
         thinkingMessage.classList.add('error');
     }
 };
